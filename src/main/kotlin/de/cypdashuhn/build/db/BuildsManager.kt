@@ -8,6 +8,7 @@ import org.jetbrains.exposed.dao.IntEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.transactions.transaction
 
 object BuildsManager {
     @RoosterTable
@@ -34,12 +35,14 @@ object BuildsManager {
     fun buildByName(name: String) = Build.findEntry(Builds.name eq name)
 
     fun register(name: String, pos1: Location, pos2: Location) {
-        val build = Build.new {
-            this.name = name
-            this.frameAmount = 1
-            this.xLength = (pos2.x - pos1.x).toInt()
-            this.yLength = (pos2.y - pos1.y).toInt()
-            this.zLength = (pos2.z - pos1.z).toInt()
+        transaction {
+            Build.new {
+                this.name = name
+                this.frameAmount = 1
+                this.xLength = (pos2.x - pos1.x).toInt()
+                this.yLength = (pos2.y - pos1.y).toInt()
+                this.zLength = (pos2.z - pos1.z).toInt()
+            }
         }
     }
 }

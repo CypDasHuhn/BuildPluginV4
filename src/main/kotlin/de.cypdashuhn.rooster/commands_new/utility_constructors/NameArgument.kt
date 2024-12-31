@@ -16,7 +16,7 @@ object NameArgument {
     ): UnfinishedArgument {
         return UnfinishedArgument(
             key = key,
-            suggestions = { listOf(t("rooster.name_placeholder")) },
+            suggestions = { listOf(t("rooster_name_placeholder")) },
             isValid = isValid
         )
     }
@@ -24,12 +24,12 @@ object NameArgument {
     fun unique(
         usedNames: List<String>,
         key: String = "name",
-        uniqueErrorKey: String = "rooster.name_used",
+        uniqueErrorKey: String = "rooster_name_used",
         isValid: ((ArgumentInfo) -> IsValidResult)? = null
     ): UnfinishedArgument {
         return UnfinishedArgument(
             key = key,
-            suggestions = { listOf(t("rooster.name_placeholder")) },
+            suggestions = { listOf(t("rooster_name_placeholder")) },
             isValid = {
                 if (usedNames.contains(it.arg)) {
                     IsValidResult.Invalid { info -> info.sender.tSend(uniqueErrorKey) }
@@ -46,11 +46,11 @@ object NameArgument {
         extraQuery: Op<Boolean>? = null,
         isValid: ((ArgumentInfo) -> IsValidResult)? = null,
         key: String = "name",
-        uniqueErrorKey: String = "rooster.name_used"
+        uniqueErrorKey: String = "rooster_name_used"
     ): UnfinishedArgument {
         return UnfinishedArgument(
             key = key,
-            suggestions = { listOf(t("rooster.name_placeholder")) },
+            suggestions = { listOf(t("rooster_name_placeholder")) },
             isValid = {
                 transaction {
                     var query = targetColumn eq it.arg

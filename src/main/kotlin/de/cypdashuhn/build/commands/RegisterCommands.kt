@@ -19,6 +19,8 @@ val register = Arguments.literal.single(name = "register", isEnabled = { it.send
                 val name = it.context["name"] as String
 
                 it.sender.tSend("build_register_step_1", "name" to name)
+
+                RegisterBuild.registerStart(it.sender as Player, name)
             }
             .onMissing(errorMessage("build_register_name_missing")),
         Arguments.literal.single("pos1", isEnabled = { RegisterBuild.isPlayerRegistering(it.sender as Player) })

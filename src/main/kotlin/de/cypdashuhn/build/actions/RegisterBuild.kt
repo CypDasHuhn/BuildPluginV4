@@ -2,6 +2,7 @@ package de.cypdashuhn.build.actions
 
 import database.utility_tables.attributes.AttributeKey
 import de.cypdashuhn.build.BuildPlugin
+import de.cypdashuhn.build.db.BuildsManager
 import org.bukkit.Location
 import org.bukkit.entity.Player
 
@@ -45,9 +46,9 @@ object RegisterBuild {
         val pos1 = BuildPlugin.locationManager.locationById(data.pos1Id!!)
         val pos2 = BuildPlugin.locationManager.locationById(data.pos2Id!!)
 
-        assert(listOf(pos1, pos2).none { it == null }) { "Pos1 or Pos2 is null" }
+        assert(listOf(pos1, pos2).none { it == null }) { "Pos1 or Pos2 not found" }
 
-        
+        BuildsManager.register(data.buildName!!, pos1!!, pos2!!)
     }
 
     fun isPlayerRegistering(sender: Player): Boolean {

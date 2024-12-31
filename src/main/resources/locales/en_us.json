@@ -3,9 +3,6 @@
   "build_register_name_missing": "<red>You need to provide a name for the build!",
   "build_register_no_block_selected": "<red>You are not looking at a block!",
   "build_register_step_1": "<green>You are registering the build \"<gold>${name}<green>\".\nUse \"<purple>build pos1<green>\" to continue.",
-  "name_placeholder": "[name]",
-  "rooster": {
-    "number_placeholder": "[number]"
-  },
+  "rooster_name_placeholder": "[name]",
   "test": "<bold><gold>Hello!"
 }

@@ -58,7 +58,11 @@ class RoosterCache<K, V>(cacheBuilder: CacheBuilder<Any, Any>, corePoolSize: Int
         val typeKey = sender?.uniqueKey() ?: generalKey
 
         if (clearTime != null) invalidateWithTimeout(key, sender, clearTime, unit)
-        return cache.get(typeKey to key, provider) as T
+        return try {
+            cache.get(typeKey to key, provider) as T
+        } catch (e: Exception) {
+            provider()
+        }
     }
 
     fun size() = cache.size()

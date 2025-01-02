@@ -1,9 +1,16 @@
 package de.cypdashuhn.rooster.commands_new.utility_constructors
 
-import de.cypdashuhn.rooster.commands_new.constructors.ArgumentInfo
-import de.cypdashuhn.rooster.commands_new.constructors.ArgumentPredicate
-import de.cypdashuhn.rooster.commands_new.constructors.IsValidResult
-import de.cypdashuhn.rooster.commands_new.constructors.UnfinishedArgument
+import de.cypdashuhn.rooster.commands_new.constructors.*
+import de.cypdashuhn.rooster.core.Rooster.cache
+import de.cypdashuhn.rooster.localization.tSend
+import org.jetbrains.exposed.dao.IntEntity
+import org.jetbrains.exposed.dao.IntEntityClass
+import org.jetbrains.exposed.sql.Column
+import org.jetbrains.exposed.sql.Query
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.lowerCase
+import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.sql.transactions.transaction
 
 object ListArgument {
     fun single(
@@ -42,6 +49,76 @@ object ListArgument {
                 transformValue?.invoke(it, arg) ?: arg
             },
             suggestions = { list.map { "$prefix$it" } }
+        )
+    }
+
+    data class DBCacheInfo(
+        val query: Query,
+        val arg: String
+    )
+
+    private const val LIST_FILTERED_CACHE_KEY = "rooster_list_cache_filtered"
+    private const val LIST_CACHE_KEY = "rooster_list_cache_filtered"
+
+    fun <E : IntEntity> dbList(
+        entity: IntEntityClass<E>,
+        displayField: Column<String>,
+        filter: ((ArgumentInfo, E) -> Boolean)? = null,
+        ignoreCase: Boolean = false,
+        key: String,
+        errorInvalidMessageKey: String,
+        argKey: String = "arg",
+        errorMissingMessageKey: String,
+        isArgument: ArgumentPredicate = { true },
+        isValidCompleter: ArgumentPredicate? = null,
+        errorArgumentOverflow: ((ArgumentInfo) -> Unit)? = null,
+        transformValue: ((ArgumentInfo) -> Any) = { it.arg },
+    ): UnfinishedArgument {
+        return UnfinishedArgument(
+            isTarget = isArgument,
+            isEnabled = isValidCompleter,
+            transformValue = transformValue,
+            onArgumentOverflow = errorArgumentOverflow,
+            isValid = { (sender, args, arg, index, values) ->
+                transaction {
+                    val condition = if (ignoreCase) displayField.lowerCase() eq arg.lowercase() else displayField eq arg
+
+                    /*var cacheInfo = cache.getIfPresent(LIST_FILTERED_CACHE_KEY, sender)
+                    cacheInfo =  cacheInfo as DBCacheInfo?*/
+                    val query = entity.table.selectAll()
+
+                    val entries = query.where { condition }
+
+                    // Cache the entries
+                    /*cache.put(LIST_FILTERED_CACHE_KEY, sender, DBCacheInfo(entries, arg), 5 * 1000)*/
+
+                    val matchingEntries = entity.wrapRows(entries)
+
+                    val filteredEntries = if (filter != null) matchingEntries.filter {
+                        filter(ArgumentInfo(sender, args, arg, index, values), it)
+                    } else matchingEntries
+
+                    when {
+                        filteredEntries.firstOrNull() == null -> IsValidResult.Invalid { it.sender.tSend(errorInvalidMessageKey, argKey to it.arg) }
+                        else -> IsValidResult.Valid()
+                    }
+                }
+            },
+            suggestions = { argInfo ->
+                transaction {
+                    val entries = cache.get(
+                        LIST_CACHE_KEY,
+                        argInfo.sender,
+                        { entity.wrapRows(entity.table.selectAll()) },
+                        5 * 1000
+                    )
+
+                    val matchingEntries = if (filter != null) entries.filter { filter(argInfo, it) } else entries
+                    matchingEntries.map { it.readValues[displayField] }
+                }
+            },
+            key = key,
+            onMissing = errorMessage(errorMissingMessageKey),
         )
     }
 

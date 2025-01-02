@@ -1,71 +1,49 @@
 package de.cypdashuhn.build.commands
 
-import de.cypdashuhn.build.actions.RegisterBuild
-import de.cypdashuhn.build.actions.SaveFrame
-import de.cypdashuhn.build.db.BuildsManager
+import de.cypdashuhn.build.actions.BuildManager
+import de.cypdashuhn.build.actions.SchematicManager
+import de.cypdashuhn.build.db.DbBuildsManager
 import de.cypdashuhn.rooster.commands_new.constructors.*
 import de.cypdashuhn.rooster.localization.tSend
 import org.bukkit.Location
 import org.bukkit.entity.Player
-
 val register = Arguments.literal.single(name = "register", isEnabled = { it.sender is Player })
-    .followedBy(
-        Arguments.literal.single(
-            name = "start",
-            isEnabled = { !RegisterBuild.isPlayerRegistering(it.sender as Player) }
-        )
-            .followedBy(Arguments.names.unique(table = BuildsManager.Builds, targetColumn = BuildsManager.Builds.name))
-            .onExecute {
-                val name = it.context["name"] as String
+    .followedBy(Arguments.names.unique(table = DbBuildsManager.Builds, targetColumn = DbBuildsManager.Builds.name))
+    .onExecute {
+        val name = it.context["name"] as String
 
-                it.sender.tSend("build_register_step_1", "name" to name)
+        it.sender.tSend("build_register_step_1", "name" to name)
 
-                RegisterBuild.registerStart(it.sender as Player, name)
-            }
-            .onMissing(errorMessage("build_register_name_missing")),
-        Arguments.literal.single("pos1", isEnabled = { RegisterBuild.isPlayerRegistering(it.sender as Player) })
-            .onExecute {
-                val location = (it.sender as Player).targetBlock() ?: run {
-                    it.sender.tSend("build_register_no_block_selected")
-                    return@onExecute
-                }
-                RegisterBuild.registerPos1(it.sender, location)
-            },
-        Arguments.literal.single("pos2", isEnabled = { RegisterBuild.isPlayerRegistering(it.sender as Player) })
-            .onExecute {
-                val location = (it.sender as Player).targetBlock() ?: run {
-                    it.sender.tSend("build_register_no_block_selected")
-                    return@onExecute
-                }
-                RegisterBuild.registerPos2(it.sender, location)
-            },
-        Arguments.literal.single(
-            "end",
-            isEnabled = { RegisterBuild.isPlayerRegistering(it.sender as Player) && RegisterBuild.playerHasBothPos(it.sender) })
-            .onExecute { RegisterBuild.registerEnd(it.sender as Player) }
+        BuildManager.create(it.sender as Player, name)
+    }
+    .onMissing(errorMessage("build_register_name_missing"))
+
+fun load(argInfo: InvokeInfo, pos1: Location, pos2: Location?) {
+    BuildManager.loadAll()
+}
+
+val load = Arguments.literal.single("load")
+    .followedBy(Arguments.list.dbList(
+        DbBuildsManager.Build, DbBuildsManager.Builds.name, key = "build",
+        errorInvalidMessageKey = "build_not_found",
+        errorMissingMessageKey = "build_name_missing",
+    )).followedBy(
+        Arguments.literal.single("sel").onExecute {
+            val loc = BuildManager.selectionCorner(it.sender as Player) ?: run { return@onExecute }
+            load(it, loc, null)
+        },
+
     )
+    .onExecute {
+        val buildName = it.context["build"] as String
 
-val test = Arguments.literal.single("test")
-    .followedBy(
-        Arguments.literal.single("save")
-            .followedBy(Arguments.number.xyzCoordinates(keyPreset = "first"))
-            .followedBy(Arguments.number.xyzCoordinates(keyPreset = "second"))
-            .onExecute {
-                val first = Arguments.number.locationFromContext(it, keyPreset = "first")
-                val second = Arguments.number.locationFromContext(it, keyPreset = "second")
+        val location = (it.sender as Player).targetBlock() ?: run {
+            it.sender.tSend("build_no_block_selected")
+            return@onExecute
+        }
 
-                assert(first != null && second != null) { "locations should not be null" }
-                SaveFrame.save("test", first!!, second!!)
-            },
-        Arguments.literal.single("load")
-            .followedBy(Arguments.number.xyzCoordinates(keyPreset = "first"))
-            .onExecute {
-                val first = Arguments.number.locationFromContext(it, keyPreset = "first")
-
-                assert(first != null) { "locations should not be null" }
-                SaveFrame.load("test", first!!)
-            }
-    )
+        SchematicManager.load(buildName, 1, location)
+    }
 
 
 object BuildCommand : RoosterCommand("build") {
@@ -74,7 +52,7 @@ object BuildCommand : RoosterCommand("build") {
             .onExecute {
                 it.sender.tSend("test")
             }
-            .followedBy(register, test)
+            .followedBy(register, load)
     }
 }
 

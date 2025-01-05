@@ -19,7 +19,7 @@ val register = Arguments.literal.single(name = "register", isEnabled = { it.send
     .onMissing(errorMessage("build_register_name_missing"))
 
 fun load(argInfo: InvokeInfo, pos1: Location, pos2: Location?) {
-    BuildManager.loadAll()
+    BuildManager.loadAll(argInfo.sender as Player, argInfo.context["build"] as String, pos1, pos2)
 }
 
 val load = Arguments.literal.single("load")

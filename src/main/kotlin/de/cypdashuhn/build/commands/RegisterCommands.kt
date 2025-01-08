@@ -1,13 +1,13 @@
 package de.cypdashuhn.build.commands
 
 import de.cypdashuhn.build.actions.BuildManager
-import de.cypdashuhn.build.actions.BuildManager.selection
-import de.cypdashuhn.build.actions.SchematicManager
 import de.cypdashuhn.build.db.DbBuildsManager
-import de.cypdashuhn.rooster.commands_new.constructors.*
+import de.cypdashuhn.rooster.commands.*
 import de.cypdashuhn.rooster.localization.tSend
+import de.cypdashuhn.rooster_worldedit.commands.WESelectionArgument
 import org.bukkit.Location
 import org.bukkit.entity.Player
+
 val register = Arguments.literal.single(name = "register", isEnabled = { it.sender is Player })
     .followedBy(Arguments.names.unique(table = DbBuildsManager.Builds, targetColumn = DbBuildsManager.Builds.name))
     .onExecute {
@@ -19,49 +19,79 @@ val register = Arguments.literal.single(name = "register", isEnabled = { it.send
     }
     .onMissing(errorMessage("build_register_name_missing"))
 
-fun load(argInfo: InvokeInfo, pos1: Location, pos2: Location?) {
-    BuildManager.loadAll(argInfo.sender as Player, argInfo.context["build"] as String, pos1, pos2)
+fun load(argInfo: InvokeInfo, pos1: Location, pos2: Location?, frame: Int? = null) {
+    val player = argInfo.sender as Player
+    val build = argInfo.context["build"] as String
+
+    if (frame == null) BuildManager.loadAll(player, build, pos1, pos2)
+    else BuildManager.load(player, build, frame, pos1, pos2)
 }
 
-val load = Arguments.literal.single("load")
-    .followedBy(Arguments.list.dbList(
-        DbBuildsManager.Build, DbBuildsManager.Builds.name, key = "build",
-        errorInvalidMessageKey = "build_not_found",
-        errorMissingMessageKey = "build_name_missing",
-    )).followedBy(
-        listOf(
-            Arguments.literal.single(
-                name = "sel",
-                key = "region",
-                isEnabled = { (it.sender as Player).selection() != null  },
-                transformValue = { (it.sender as Player).selection()!! }
-            ),
-            Arguments.location.location()
-        ).onExecute {
-            val loc = BuildManager.selectionCorner(it.sender as Player) ?: run { return@onExecute }
-            load(it, loc, null)
-        },
+val buildNameArgument = Arguments.list.dbList(
+    DbBuildsManager.Build,
+    DbBuildsManager.Builds.name,
+    key = "build",
+    errorInvalidMessageKey = "build_not_found",
+    errorMissingMessageKey = "build_name_missing",
+)
 
-    )
-    .onExecute {
-        val buildName = it.context["build"] as String
+val regionArguments = listOf(
+    WESelectionArgument.regionSelection(),
+    Arguments.location.region()
+).eachOnExecuteWithThis { info, arg ->
+    val region = info.arg(arg)
+    load(info, region.edge1, region.edge2)
+}
 
-        val location = (it.sender as Player).targetBlock() ?: run {
-            it.sender.tSend("build_no_block_selected")
-            return@onExecute
-        }
+val locationArgument = (Arguments.location.location().onExecuteWithThis { info, arg ->
+    val loc = info.arg(arg)
+    load(info, loc, null)
+})
 
-        SchematicManager.load(buildName, 1, location)
+val frameArgument = Arguments.number.number(
+    key = "frame",
+    negativesNotAcceptedErrorMessageKey = "build_frame_not_positive"
+).onExecute {
+    val loc = it.argNullable(locationArgument)
+    val frame = it.context["frame"] as Double
+
+    if (loc != null) {
+        load(it, loc, null, frame.toInt())
+    } else {
+        val region = it.arg(regionArguments)
+        load(it, region.edge1, region.edge2, frame.toInt())
     }
+}
+
+val load: Argument = Arguments.literal.single("load")
+    .followedBy(buildNameArgument)
+    .followedBy((regionArguments or locationArgument).eachFollowedBy(frameArgument))
+
+val selection = WESelectionArgument.regionSelection()
+
+val newFrame = Arguments.number.number(
+    key = "frame",
+    negativesNotAcceptedErrorMessageKey = "build_frame_not_positive"
+).onExecute {
+    val buildName = it.context["build"] as String
+    val region = it.arg(selection)
+    val frame = it.context["frame"] as Double
+
+    BuildManager.save(it.sender as Player, buildName, frame.toInt(), region.edge1, region.edge2)
+}
+
+val save: Argument = Arguments.literal.single("save")
+    .followedBy(buildNameArgument)
+    .followedBy(selection)
+    .followedBy(newFrame)
 
 
 object BuildCommand : RoosterCommand("build") {
     override fun content(arg: UnfinishedArgument): Argument {
-        return arg
-            .onExecute {
-                it.sender.tSend("test")
-            }
-            .followedBy(register, load)
+        val command = arg
+            .followedBy(register, load, save)
+        
+        return command
     }
 }
 

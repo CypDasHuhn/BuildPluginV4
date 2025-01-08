@@ -1,6 +1,5 @@
 package de.cypdashuhn.build.actions
 
-import com.sk89q.worldedit.IncompleteRegionException
 import com.sk89q.worldedit.WorldEdit
 import com.sk89q.worldedit.bukkit.BukkitAdapter
 import com.sk89q.worldedit.bukkit.BukkitAdapter.asBlockVector
@@ -11,13 +10,10 @@ import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormats
 import com.sk89q.worldedit.function.operation.ForwardExtentCopy
 import com.sk89q.worldedit.function.operation.Operation
 import com.sk89q.worldedit.function.operation.Operations
-import com.sk89q.worldedit.regions.CuboidRegion
 import com.sk89q.worldedit.regions.Region
 import com.sk89q.worldedit.session.ClipboardHolder
-import com.sk89q.worldedit.world.World
 import de.cypdashuhn.rooster.core.Rooster
 import org.bukkit.Location
-import org.bukkit.entity.Player
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -27,6 +23,7 @@ object SchematicManager {
     fun dir(buildName: String, frame: Int): File {
         return File(Rooster.pluginFolder + "/schematics/$buildName/$frame.schem")
     }
+
     fun save(buildName: String, frame: Int, region: Region) {
         val file = dir(buildName, frame)
         file.parentFile.mkdirs()
@@ -62,14 +59,5 @@ object SchematicManager {
                 Operations.complete(operation)
             }
         }
-    }
-
-    fun Player.worldEditSelection(): Region? {
-        val actor = BukkitAdapter.adapt(this)
-        val manager = WorldEdit.getInstance().sessionManager
-        val localSession = manager.get(actor)
-
-        val selectionWorld = localSession.selectionWorld ?: return null
-        return localSession.getSelection(selectionWorld)
     }
 }

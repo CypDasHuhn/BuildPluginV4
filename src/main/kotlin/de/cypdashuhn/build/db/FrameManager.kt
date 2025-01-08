@@ -20,6 +20,7 @@ object FrameManager {
 
         /** Time in ms for how long this frame will last. Null if all frames of the build have the same duration. */
         val duration = integer("duration").nullable()
+        val targetFrameSchematic = integer("targetFrameSchematic").nullable()
 
         override val id: Column<EntityID<String>> = varchar("id", 255).entityId()
 

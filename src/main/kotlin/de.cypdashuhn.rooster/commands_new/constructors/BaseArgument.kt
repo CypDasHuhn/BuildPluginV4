@@ -1,19 +1,21 @@
 package de.cypdashuhn.rooster.commands_new.constructors
 
+import de.cypdashuhn.rooster.commands_new.utility_constructors.bukkit.CommandContext
 import de.cypdashuhn.rooster.localization.tSend
 import org.bukkit.command.CommandSender
 
 data class InvokeInfo(
     val sender: CommandSender,
-    val context: Map<String, Any?>
+    val context: CommandContext,
+    val args: List<String>,
 )
 
 data class ArgumentInfo(
     val sender: CommandSender,
-    val args: Array<String>,
+    val args: List<String>,
     val arg: String,
     val index: Int,
-    val context: Map<String, Any?>
+    val context: CommandContext
 )
 
 typealias ArgumentPredicate = (ArgumentInfo) -> Boolean
@@ -165,6 +167,12 @@ abstract class BaseArgument(
 
     fun isValid(isValid: ((ArgumentInfo) -> IsValidResult)?): Argument {
         return appendChange { it.isValid = isValid }.toArgument()
+    }
+}
+
+fun List<BaseArgument>.onExecute(onExecute: (InvokeInfo) -> Unit): List<Argument> {
+    return this.map {
+        it.onExecute(onExecute)
     }
 }
 

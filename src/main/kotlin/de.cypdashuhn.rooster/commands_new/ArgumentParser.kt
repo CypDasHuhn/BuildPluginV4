@@ -3,6 +3,7 @@ package de.cypdashuhn.rooster.commands_new
 import de.cypdashuhn.rooster.commands_new.constructors.ArgumentInfo
 import de.cypdashuhn.rooster.commands_new.constructors.BaseArgument
 import de.cypdashuhn.rooster.commands_new.constructors.InvokeInfo
+import de.cypdashuhn.rooster.commands_new.utility_constructors.bukkit.CommandContext
 import de.cypdashuhn.rooster.core.Rooster.cache
 import de.cypdashuhn.rooster.core.Rooster.registeredRootArguments
 import de.cypdashuhn.rooster.localization.language
@@ -50,18 +51,18 @@ object ArgumentParser {
         Invocation
     }
 
-    const val CACHE_KEY = "rooster_arguments_cache"
+    private const val CACHE_KEY = "rooster_arguments_cache"
 
-    private fun Array<String>.withoutLast(): Array<String> {
-        return this.copyOfRange(0, this.size - 1)
+    private fun List<String>.withoutLast(): List<String> {
+        return this.toTypedArray().copyOfRange(0, this.size - 1).toList()
     }
 
     data class CacheInfo(
-        val stringArguments: Array<String>,
+        val stringArguments: List<String>,
         val arguments: MutableList<BaseArgument>,
         val headArgument: BaseArgument,
         val errorArgumentOverflow: ((ArgumentInfo) -> Unit)?,
-        val context: HashMap<String, Any?>
+        val context: CommandContext
     )
 
     fun parse(
@@ -73,7 +74,7 @@ object ArgumentParser {
         val errorWithoutInfo = ReturnResult()
 
         val topArgument = requireNotNull(
-            registeredRootArguments.firstOrNull { it.labels.any { it.lowercase() == label.lowercase() } }
+            registeredRootArguments.firstOrNull { arg -> arg.labels.any { it.lowercase() == label.lowercase() } }
         ) { "Root must be found, else command invocation wouldn't be possible" }
 
         val continueArgument = topArgument.onStart(sender)
@@ -81,12 +82,12 @@ object ArgumentParser {
 
         /* Prepends label to arguments
         "/label [...args]" -> [label, ...args]  */
-        val stringArguments = rawStringArguments.toMutableList().also { it.add(0, label) }.toTypedArray()
+        val stringArguments = rawStringArguments.toMutableList().also { it.add(0, label) }.toList()
 
         var headArgument = topArgument.command as BaseArgument
         var arguments = mutableListOf(headArgument)
         var onArgumentOverflow = headArgument.onArgumentOverflow
-        var context: HashMap<String, Any?> = HashMap()
+        var context = CommandContext()
 
         var cachePosition: Int? = null
         val cacheInfo = cache.getIfPresent(CACHE_KEY, sender) as CacheInfo?
@@ -230,7 +231,7 @@ object ArgumentParser {
                     }
                     if (comparativeArgument.onExecute != null) {
                         return ReturnResult(success = true) {
-                            comparativeArgument.onExecute!!(InvokeInfo(sender, context))
+                            comparativeArgument.onExecute!!(InvokeInfo(sender, context, stringArguments))
                         }
                     }
 
@@ -272,4 +273,8 @@ object ArgumentParser {
             cacheInfo,
         )
     }
+}
+
+private inline infix fun <reified E> List<E>.contentEquals(list: List<E>): Boolean {
+    return this.toTypedArray() contentEquals list.toTypedArray()
 }

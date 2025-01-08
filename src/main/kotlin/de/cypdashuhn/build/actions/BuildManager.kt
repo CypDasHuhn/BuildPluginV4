@@ -88,7 +88,7 @@ object BuildManager {
         }
     }
 
-    private fun BlockVector3.toLocation(world: World): Location {
+    fun BlockVector3.toLocation(world: World): Location {
         return Location(world, this.x().toDouble(), this.y().toDouble(), this.z().toDouble())
     }
 }

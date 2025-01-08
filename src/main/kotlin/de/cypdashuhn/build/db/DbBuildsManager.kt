@@ -22,6 +22,9 @@ object DbBuildsManager {
 
         /** time in ms the frame is left for among all frames. if null, there are multiple frame times*/
         val generalDuration = integer("generalDuration").nullable()
+
+        /** True -> Morph, False -> Move, Null -> Morph&Move */
+        val isMorph = bool("isMorph").nullable()
     }
 
     class Build(id: EntityID<Int>) : IntEntity(id) {
@@ -35,11 +38,22 @@ object DbBuildsManager {
         var zLength by Builds.zLength
 
         var generalDuration by Builds.generalDuration
+
+        private var isMorph by Builds.isMorph
+        var morphType: BuildType
+            get() = BuildType.entries.first { it.isMorph == isMorph }
+            set(value) { isMorph = value.isMorph }
+    }
+
+    enum class BuildType(val isMorph: Boolean?) {
+        MORPH(true),
+        MOVE(false),
+        MORPH_MOVE(null)
     }
 
     fun buildByName(name: String) = Build.findEntry(Builds.name eq name)
 
-    fun register(name: String, dimensions: Vector3) {
+    fun register(name: String, dimensions: Vector3, ) {
         transaction {
             Build.new {
                 this.name = name
@@ -48,6 +62,7 @@ object DbBuildsManager {
                 this.yLength = dimensions.y().toInt()
                 this.zLength = dimensions.z().toInt()
                 this.generalDuration = 100
+                this.morphType
             }
         }
     }

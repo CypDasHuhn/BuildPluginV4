@@ -1,6 +1,7 @@
 package de.cypdashuhn.build.commands
 
 import de.cypdashuhn.build.actions.BuildManager
+import de.cypdashuhn.build.actions.BuildManager.selection
 import de.cypdashuhn.build.actions.SchematicManager
 import de.cypdashuhn.build.db.DbBuildsManager
 import de.cypdashuhn.rooster.commands_new.constructors.*
@@ -28,7 +29,15 @@ val load = Arguments.literal.single("load")
         errorInvalidMessageKey = "build_not_found",
         errorMissingMessageKey = "build_name_missing",
     )).followedBy(
-        Arguments.literal.single("sel").onExecute {
+        listOf(
+            Arguments.literal.single(
+                name = "sel",
+                key = "region",
+                isEnabled = { (it.sender as Player).selection() != null  },
+                transformValue = { (it.sender as Player).selection()!! }
+            ),
+            Arguments.location.location()
+        ).onExecute {
             val loc = BuildManager.selectionCorner(it.sender as Player) ?: run { return@onExecute }
             load(it, loc, null)
         },

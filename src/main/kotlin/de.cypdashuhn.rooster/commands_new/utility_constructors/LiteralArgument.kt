@@ -15,9 +15,10 @@ object LiteralArgument {
         onMissingChild: ((ArgumentInfo) -> Unit)? = null,
         transformValue: ((ArgumentInfo) -> Any) = { it.arg },
         onArgumentOverflow: ((ArgumentInfo) -> Unit)? = null,
+        key: String = name,
     ): UnfinishedArgument {
         return UnfinishedArgument(
-            key = name,
+            key = key,
             suggestions = { listOf(name) },
             isEnabled = isEnabled,
             isTarget = isTarget,

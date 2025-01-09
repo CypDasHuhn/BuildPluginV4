@@ -43,7 +43,7 @@ object WESelectionArgument {
     }
 
     fun regionSelection(
-        name: String = t("rooster_worldedit_selection"),
+        name: String = t("rooster_worldedit.selection"),
         key: String = "region",
         /** Error message key if the selection is not present.
          * By default null, meaning without a selection this command isn't enabled */

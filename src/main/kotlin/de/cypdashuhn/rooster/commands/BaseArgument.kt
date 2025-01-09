@@ -1,6 +1,5 @@
 package de.cypdashuhn.rooster.commands
 
-import de.cypdashuhn.rooster.localization.tSend
 import org.bukkit.command.CommandSender
 
 open class InvokeInfo(
@@ -64,10 +63,6 @@ data class ArgumentInfo(
 
 typealias ArgumentPredicate = (ArgumentInfo) -> Boolean
 
-fun errorMessage(errorMessageKey: String, arg: String = "arg"): (ArgumentInfo) -> Unit = {
-    it.sender.tSend(errorMessageKey, arg to it.arg)
-}
-
 abstract class BaseArgument(
     open var key: String,
     open var isEnabled: (ArgumentPredicate)? = { true },
@@ -83,7 +78,7 @@ abstract class BaseArgument(
     open var onArgumentOverflow: ((ArgumentInfo) -> Unit)? = null,
     internal var internalLastChange: BaseArgument? = null
 ) {
-    private fun toArgument(): Argument {
+    protected fun toArgument(): Argument {
         if (this is Argument) return this
         return if (isOptional) Argument.optional(
             key = key,
@@ -140,6 +135,10 @@ abstract class BaseArgument(
             isOptional = isOptional,
             onArgumentOverflow = onArgumentOverflow,
         ).also { it.internalLastChange = internalLastChange }
+    }
+
+    open fun copy(): BaseArgument {
+        return toArgument()
     }
 
     fun displayPaths(): List<String> {
@@ -222,16 +221,16 @@ abstract class BaseArgument(
 internal fun <T : BaseArgument> T.appendChange(changeArgument: (BaseArgument) -> Unit): T {
     var currentArgument: BaseArgument = this
     var count = 0
-    while (true) {
-        if (currentArgument.followedBy == null) {
-            changeArgument(currentArgument)
-            this.internalLastChange = currentArgument
-            return this
-        } else {
-            currentArgument = currentArgument.followedBy!!.last()
+
+    while (currentArgument.followedBy != null) {
+        currentArgument = currentArgument.followedBy!!.last()
+        if (count++ >= 1000) {
+            throw IllegalStateException("Infinite Loop")
         }
-        if (count < 1000) count++ else throw IllegalStateException("Infinite Loop")
     }
+    changeArgument(currentArgument)
+    this.internalLastChange = currentArgument
+    return this
 }
 
 fun List<BaseArgument>.eachOnExecute(onExecute: (InvokeInfo) -> Unit): List<Argument> {
@@ -241,15 +240,13 @@ fun List<BaseArgument>.eachOnExecute(onExecute: (InvokeInfo) -> Unit): List<Argu
 }
 
 fun List<BaseArgument>.eachFollowedBy(followedBy: List<Argument>): List<Argument> {
-    return this.map {
-        it.followedBy(followedBy)
+    return this.map { arg ->
+        arg.followedBy(followedBy)
     }
 }
 
 fun List<BaseArgument>.eachFollowedBy(vararg followedBy: Argument): List<Argument> {
-    return this.map {
-        it.followedBy(followedBy.toList())
-    }
+    return eachFollowedBy(followedBy.toList())
 }
 
 fun List<BaseArgument>.eachFollowedBy(followedBy: UnfinishedArgument): List<UnfinishedArgument> {
@@ -272,24 +269,4 @@ infix fun List<Argument>.or(followedBy: Argument): List<Argument> {
 
 infix fun List<UnfinishedArgument>.or(followedBy: BaseArgument): List<UnfinishedArgument> {
     return this + followedBy.toUnfinishedArgument()
-}
-
-sealed class IsValidResult(
-    val isValid: Boolean,
-    val error: ((ArgumentInfo) -> Unit)? = null
-) {
-    class Valid : IsValidResult(true, null)
-    class Invalid(error: ((ArgumentInfo) -> Unit)) : IsValidResult(false, error)
-}
-
-object TestCommand : RoosterCommand("Test") {
-    override fun content(arg: UnfinishedArgument): Argument {
-        return arg
-            .onExecute { it.sender.tSend("test") }
-            .followedBy(Arguments.literal.single("player"))
-            .followedBy(
-                Arguments.literal.single("branch1").followedBy(Arguments.literal.single("deeper")).onExecute { })
-            .or(Arguments.literal.single("branchTwo")).onExecute { }
-    }
-
 }

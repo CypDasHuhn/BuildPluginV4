@@ -23,12 +23,11 @@ object BuildManager {
         SchematicManager.save(buildName, 1, region)
     }
 
-    fun load(player: Player, buildName: String, frame: Int, pos1: Location, pos2: Location?) {
-        SchematicManager.load(buildName, frame, target(player, pos1, pos2))
+    fun load(player: Player, build: DbBuildsManager.Build, frame: Int, pos1: Location, pos2: Location?) {
+        SchematicManager.load(build.name, frame, target(player, pos1, pos2))
     }
 
-    fun loadAll(player: Player, buildName: String, pos1: Location, pos2: Location?) {
-        val build = DbBuildsManager.buildByName(buildName) ?: throw IllegalStateException("Build should exist")
+    fun loadAll(player: Player, build: DbBuildsManager.Build, pos1: Location, pos2: Location?) {
         val frames = build.frameAmount
         val generalDuration = build.generalDuration
 
@@ -47,14 +46,14 @@ object BuildManager {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, Runnable {
             (1..frames).forEach { frameNumber ->
                 val duration = generalDuration ?: run {
-                    val frame = FrameManager.getFrame(buildName, frameNumber)
+                    val frame = FrameManager.getFrame(build.name, frameNumber)
                         ?: throw IllegalStateException("Frame should exist")
 
                     frame.duration ?: throw IllegalStateException("Frame duration should exist")
                 }
 
                 Bukkit.getScheduler().runTask(plugin, Runnable {
-                    load(player, buildName, frameNumber, corner, null)
+                    load(player, build, frameNumber, corner, null)
                 })
 
                 Thread.sleep(duration.toLong())
@@ -68,9 +67,13 @@ object BuildManager {
         }
     }
 
-    fun save(player: Player, buildName: String, frame: Int, pos1: Location, pos2: Location?) {
-        val build = DbBuildsManager.buildByName(buildName) ?: throw IllegalStateException("Build should exist")
+    fun save(player: Player, build: DbBuildsManager.Build, frame: Int, pos1: Location, pos2: Location?) {
         val frames = build.frameAmount
+
+        if (frame > frames) {
+            player.tSend("build_frame_too_high")
+            return
+        }
 
         if (pos2 != null) {
             val region = region(pos1, pos2)
@@ -86,7 +89,7 @@ object BuildManager {
         val secondCorner =
             pos2 ?: pos1.add(build.xLength.toDouble(), build.yLength.toDouble(), build.zLength.toDouble())
 
-        SchematicManager.save(buildName, frame, region(corner, secondCorner))
+        SchematicManager.save(build.name, frame, region(corner, secondCorner))
     }
 }
 

@@ -1,10 +1,10 @@
-package de.cypdashuhn.rooster.localization
+package de.cypdashuhn.rooster.localization.provider
 
 import de.cypdashuhn.rooster.database.YmlOperations
 import de.cypdashuhn.rooster.database.YmlShell
 import de.cypdashuhn.rooster.util.uuid
 import org.bukkit.entity.Player
-import java.util.Locale
+import java.util.*
 
 class YmlLocaleProvider(
     override var locales: Map<Language, Locale>,

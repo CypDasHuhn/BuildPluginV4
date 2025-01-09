@@ -1,4 +1,4 @@
-package de.cypdashuhn.rooster.localization
+package de.cypdashuhn.rooster.localization.provider
 
 import de.cypdashuhn.rooster.core.Rooster
 import de.cypdashuhn.rooster.database.findEntry
@@ -10,7 +10,7 @@ import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
-import java.util.Locale
+import java.util.*
 
 class SqlLocaleProvider(override var locales: Map<Language, Locale>, override var defaultLocale: String) :
     LocaleProvider(locales, defaultLocale) {

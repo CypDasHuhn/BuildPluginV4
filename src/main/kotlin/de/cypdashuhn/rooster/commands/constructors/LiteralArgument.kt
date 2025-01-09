@@ -1,9 +1,6 @@
 package de.cypdashuhn.rooster.commands.constructors
 
-import de.cypdashuhn.rooster.commands.ArgumentInfo
-import de.cypdashuhn.rooster.commands.ArgumentPredicate
-import de.cypdashuhn.rooster.commands.IsValidResult
-import de.cypdashuhn.rooster.commands.UnfinishedArgument
+import de.cypdashuhn.rooster.commands.*
 import de.cypdashuhn.rooster.localization.language
 import de.cypdashuhn.rooster.localization.transformMessage
 
@@ -18,8 +15,8 @@ object LiteralArgument {
         transformValue: ((ArgumentInfo) -> Any) = { it.arg },
         onArgumentOverflow: ((ArgumentInfo) -> Unit)? = null,
         key: String = name,
-    ): UnfinishedArgument {
-        return UnfinishedArgument(
+    ): LiteralArgumentType {
+        val arg = UnfinishedArgument(
             key = key,
             suggestions = { listOf(name) },
             isEnabled = isEnabled,
@@ -31,6 +28,8 @@ object LiteralArgument {
             onMissingChild = onMissingChild,
             isOptional = false
         )
+
+        return LiteralArgumentType(arg, key)
     }
 
     fun multiple(
@@ -43,8 +42,8 @@ object LiteralArgument {
         onMissingChild: ((ArgumentInfo) -> Unit)? = null,
         transformValue: ((ArgumentInfo) -> Any) = { it.arg },
         onArgumentOverflow: ((ArgumentInfo) -> Unit)? = null,
-    ): UnfinishedArgument {
-        return UnfinishedArgument(
+    ): LiteralArgumentType {
+        val arg = UnfinishedArgument(
             key = key,
             suggestions = { names },
             isEnabled = isEnabled,
@@ -56,5 +55,10 @@ object LiteralArgument {
             onMissingChild = onMissingChild,
             isOptional = false
         )
+
+        return LiteralArgumentType(arg, key)
     }
+
+    class LiteralArgumentType(arg: UnfinishedArgument, argKey: String) :
+        SimpleArgumentType<String>("Literal", arg, argKey)
 }

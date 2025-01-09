@@ -3,6 +3,7 @@ package de.cypdashuhn.rooster.commands.constructors
 import de.cypdashuhn.rooster.commands.*
 import de.cypdashuhn.rooster.core.Rooster.cache
 import de.cypdashuhn.rooster.localization.tSend
+import org.bukkit.command.CommandSender
 import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass
 import org.jetbrains.exposed.sql.Column
@@ -14,24 +15,26 @@ import org.jetbrains.exposed.sql.transactions.transaction
 
 object ListArgument {
     fun single(
-        key: String,
-        list: List<String>,
+        key: String = "list",
+        listFunc: (ArgumentInfo) -> List<String>,
         ignoreCase: Boolean = false,
         prefix: String = "",
-        notMatchingError: (ArgumentInfo, String) -> Unit,
+        notMatchingError: (ArgumentInfo, String) -> Unit = { info, _ -> errorMessage("rooster.list.not_matching")(info) },
         isEnabled: (ArgumentPredicate)? = { true },
         isTarget: (ArgumentPredicate) = { true },
-        onMissing: (ArgumentInfo) -> Unit,
+        onMissing: (ArgumentInfo) -> Unit = { info -> errorMessage("rooster.list.missing")(info) },
         isValid: ((ArgumentInfo, String) -> IsValidResult)? = null,
-        transformValue: ((ArgumentInfo, String) -> Any)? = null,
-    ): UnfinishedArgument {
-        return UnfinishedArgument(
+        transformValue: ((ArgumentInfo, String) -> Any)? = null
+    ): ListArgumentType {
+        val arg = UnfinishedArgument(
             key = key,
             isEnabled = isEnabled,
             isTarget = isTarget,
             onMissing = onMissing,
             isValid = {
                 val arg = it.arg.substring(prefix.length)
+
+                val list = listFunc(it)
 
                 if (list.none { it.equals(arg, ignoreCase) }) {
                     notMatchingError(it, arg)
@@ -48,9 +51,37 @@ object ListArgument {
 
                 transformValue?.invoke(it, arg) ?: arg
             },
-            suggestions = { list.map { "$prefix$it" } }
+            suggestions = { listFunc(it).map { "$prefix$it" } }
         )
+
+        return ListArgumentType(arg, key)
     }
+
+    fun single(
+        key: String = "list",
+        list: List<String>,
+        ignoreCase: Boolean = false,
+        prefix: String = "",
+        notMatchingError: (ArgumentInfo, String) -> Unit = { info, _ -> errorMessage("rooster.list.not_matching")(info) },
+        isEnabled: (ArgumentPredicate)? = { true },
+        isTarget: (ArgumentPredicate) = { true },
+        onMissing: (ArgumentInfo) -> Unit = { info -> errorMessage("rooster.list.missing")(info) },
+        isValid: ((ArgumentInfo, String) -> IsValidResult)? = null,
+        transformValue: ((ArgumentInfo, String) -> Any)? = null
+    ) = single(
+        key,
+        { list },
+        ignoreCase,
+        prefix,
+        notMatchingError,
+        isEnabled,
+        isTarget,
+        onMissing,
+        isValid,
+        transformValue
+    )
+
+    class ListArgumentType(arg: UnfinishedArgument, argKey: String) : SimpleArgumentType<String>("List", arg, argKey)
 
     data class DBCacheInfo(
         val query: Query,
@@ -72,12 +103,32 @@ object ListArgument {
         isArgument: ArgumentPredicate = { true },
         isValidCompleter: ArgumentPredicate? = null,
         errorArgumentOverflow: ((ArgumentInfo) -> Unit)? = null,
-        transformValue: ((ArgumentInfo) -> Any) = { it.arg },
-    ): UnfinishedArgument {
-        return UnfinishedArgument(
+        transformValue: ((E) -> E) = { it },
+    ): DbArgumentType<E> {
+        val arg = UnfinishedArgument(
             isTarget = isArgument,
             isEnabled = isValidCompleter,
-            transformValue = transformValue,
+            transformValue = { argInfo ->
+                val condition =
+                    if (ignoreCase) displayField.lowerCase() eq argInfo.arg.lowercase() else displayField eq argInfo.arg
+
+                val query = entity.table.selectAll()
+
+                val entries = query.where { condition }
+
+                val matchingEntries = entity.wrapRows(entries)
+
+                val filteredEntries = if (filter != null) matchingEntries.filter {
+                    filter(argInfo, it)
+                } else matchingEntries
+
+                val entry = filteredEntries.firstOrNull()
+                requireNotNull(entry) { "Entry should've been canceled before'" }
+
+                val arg = transformValue(entry)
+
+                arg
+            },
             onArgumentOverflow = errorArgumentOverflow,
             isValid = { (sender, args, arg, index, values) ->
                 transaction {
@@ -126,6 +177,20 @@ object ListArgument {
             key = key,
             onMissing = errorMessage(errorMissingMessageKey),
         )
+
+        return DbArgumentType(arg, key)
+    }
+
+    class DbArgumentType<T>(
+        argument: UnfinishedArgument,
+        val argKey: String
+    ) : TypedArgument<T>(argument) {
+        override fun value(sender: CommandSender, context: CommandContext): TypeResult<T> {
+            val data = context[argKey] as? T?
+                ?: return TypeResult.Failure(IllegalStateException("Data is null for DbList Argument"))
+
+            return TypeResult.Success(data)
+        }
     }
 
     fun chainable(
@@ -196,5 +261,17 @@ object ListArgument {
                 IsValidResult.Valid()
             }
         )
+    }
+
+    class DbListArgumentType<T>(
+        argument: UnfinishedArgument,
+        val argKey: String
+    ) : TypedArgument<List<T>>(argument) {
+        override fun value(sender: CommandSender, context: CommandContext): TypeResult<List<T>> {
+            val data = context[argKey] as? List<T>?
+                ?: return TypeResult.Failure(IllegalStateException("Data is null for DbList Argument"))
+
+            return TypeResult.Success(data)
+        }
     }
 }

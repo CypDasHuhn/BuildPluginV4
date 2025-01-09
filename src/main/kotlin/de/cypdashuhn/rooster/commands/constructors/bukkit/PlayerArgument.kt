@@ -9,9 +9,9 @@ object PlayerArgument {
 
     fun single(
         key: String = "player",
-        notMatchingKey: String = "player_not_matching",
+        notMatchingKey: String = "rooster.player.not_matching",
         notMatchingArg: String = "player",
-        onMissingKey: String = "player_missing",
+        onMissingKey: String = "rooster.player.missing_error",
     ): UnfinishedArgument {
         return ListArgument.single(
             key = key,
@@ -23,9 +23,9 @@ object PlayerArgument {
 
     fun multiple(
         key: String = "player",
-        notMatchingKey: String = "player_not_matching",
+        notMatchingKey: String = "rooster.player.not_matching",
         notMatchingArg: String = "player",
-        onMissingKey: String = "player_missing",
+        onMissingKey: String = "rooster.player.missing_error",
     ): UnfinishedArgument {
         return ListArgument.chainable(
             key = key,

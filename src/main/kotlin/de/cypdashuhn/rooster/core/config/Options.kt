@@ -29,6 +29,9 @@ object RoosterOptions {
         LOCALIZATION_MISSING_LOCALE_FILE({
             "Missing Locale-File: $it"
         }, LOCALIZATION),
+        LOCALIZATION_MISSING_ROOSTER_LOCALE_FILE({
+            "Missing Rooster Locale-File: $it. This means that you are using a Language not supported by Rooster at this Time. Try to contact the author if you want to add it."
+        })
 
         ;
 

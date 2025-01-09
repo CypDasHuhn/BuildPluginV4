@@ -96,6 +96,10 @@ class Argument : BaseArgument {
         )
     }
 
+    override fun copy(): Argument {
+        return toArgument()
+    }
+
     fun or(alternative: Argument): Argument {
         return appendAtLastChange {
             if (it.followedBy == null) {

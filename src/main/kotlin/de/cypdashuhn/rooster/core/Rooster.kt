@@ -13,8 +13,8 @@ import de.cypdashuhn.rooster.demo.DemoManager
 import de.cypdashuhn.rooster.demo.RoosterDemoManager
 import de.cypdashuhn.rooster.demo.RoosterDemoTable
 import de.cypdashuhn.rooster.listeners.RoosterListener
-import de.cypdashuhn.rooster.localization.LocaleProvider
-import de.cypdashuhn.rooster.localization.SqlLocaleProvider
+import de.cypdashuhn.rooster.localization.provider.LocaleProvider
+import de.cypdashuhn.rooster.localization.provider.SqlLocaleProvider
 import de.cypdashuhn.rooster.ui.context.InterfaceContextProvider
 import de.cypdashuhn.rooster.ui.context.SqlInterfaceContextProvider
 import de.cypdashuhn.rooster.ui.interfaces.Interface

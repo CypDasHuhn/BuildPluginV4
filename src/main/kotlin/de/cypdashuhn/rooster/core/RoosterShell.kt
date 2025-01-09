@@ -1,7 +1,7 @@
 package de.cypdashuhn.rooster.core
 
-import de.cypdashuhn.rooster.localization.LocaleProvider
-import de.cypdashuhn.rooster.localization.SqlLocaleProvider
+import de.cypdashuhn.rooster.localization.provider.LocaleProvider
+import de.cypdashuhn.rooster.localization.provider.SqlLocaleProvider
 import de.cypdashuhn.rooster.ui.context.InterfaceContextProvider
 import de.cypdashuhn.rooster.ui.context.SqlInterfaceContextProvider
 import org.bukkit.event.player.PlayerJoinEvent

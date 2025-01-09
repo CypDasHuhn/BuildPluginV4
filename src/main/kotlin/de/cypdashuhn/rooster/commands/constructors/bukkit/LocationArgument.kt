@@ -15,32 +15,32 @@ object LocationArgument {
         yKey: String = "Y",
         zKey: String = "Z",
         numberArg: String = "number",
-        notANumberErrorMessageKey: String = "rooster.not_a_number",
+        notANumberErrorMessageKey: String = "rooster.location.not_a_number",
         /**
          * setting this field to a null value will enable decimals. by default,
          * decimals will not be passed.
          */
-        decimalErrorMessageKey: String? = "rooster.decimal_error",
+        decimalErrorMessageKey: String? = "rooster.location.decimal_error",
         /**
          * setting this field to a non-null value will disable negatives. by
          * default, negatives will be passed.
          */
         negativesNotAcceptedErrorMessageKey: String? = null,
-        errorMissingXMessageKey: String = "rooster.error_missing_num",
-        errorMissingYMessageKey: String = "rooster.error_missing_num",
-        errorMissingZMessageKey: String = "rooster.error_missing_num",
+        errorMissingXMessageKey: String = "rooster.location.missing.x",
+        errorMissingYMessageKey: String = "rooster.location.missing.x",
+        errorMissingZMessageKey: String = "rooster.location.missing.x",
         xCondition: ((ArgumentInfo) -> IsValidResult)? = null,
         disableYCondition: Boolean = false,
         yCondition: ((ArgumentInfo) -> IsValidResult)? = { (sender, _, arg, _, _) ->
             val num = arg.toDouble()
             when {
                 num <= -65.0 -> {
-                    IsValidResult.Invalid { sender.tSend("rooster.number_under_build_height_error", numberArg to arg) }
+                    IsValidResult.Invalid { sender.tSend("rooster.location.y.too_low", numberArg to arg) }
                 }
 
                 num >= 321.0 -> {
                     IsValidResult.Invalid {
-                        sender.tSend("rooster.number_over_build_height_error", numberArg to arg)
+                        sender.tSend("rooster.location.y.too_high", numberArg to arg)
                     }
                 }
 
@@ -50,45 +50,42 @@ object LocationArgument {
             }
         },
         zCondition: ((ArgumentInfo) -> IsValidResult)? = null,
-        xTransformValue: ((ArgumentInfo, Double) -> Double) = { _, num -> num },
-        yTransformValue: ((ArgumentInfo, Double) -> Double) = { _, num -> num },
-        zTransformValue: ((ArgumentInfo, Double) -> Double) = { _, num -> num },
+        xTransformValue: ((ArgumentInfo, Int) -> Int) = { _, num -> num },
+        yTransformValue: ((ArgumentInfo, Int) -> Int) = { _, num -> num },
+        zTransformValue: ((ArgumentInfo, Int) -> Int) = { _, num -> num },
         xTabCompletePlaceholder: String = "[X]",
         yTabCompletePlaceholder: String = "[Y]",
         zTabCompletePlaceholder: String = "[Z]"
     ): LocationArgumentType {
-        val arg = NumberArgument.number(
+        val arg = NumberArgument.integer(
             key = "$keyPreset$xKey",
             tabCompleterPlaceholder = xTabCompletePlaceholder,
-            notANumberErrorMessageKey = notANumberErrorMessageKey,
             decimalNotAcceptedErrorMessageKey = decimalErrorMessageKey,
-            negativesNotAcceptedErrorMessageKey = negativesNotAcceptedErrorMessageKey,
-            numArg = numberArg,
-            errorMissingMessageKey = errorMissingXMessageKey,
             furtherCondition = xCondition,
-            transformValue = xTransformValue
+            transformValue = xTransformValue,
+            notANumberError = errorMessage(notANumberErrorMessageKey, numberArg),
+            negativeRule = ArgumentRule.create(negativesNotAcceptedErrorMessageKey),
+            onMissing = errorMessage(errorMissingXMessageKey)
         ).followedBy(
-            NumberArgument.number(
+            NumberArgument.integer(
                 key = "$keyPreset$yKey",
                 tabCompleterPlaceholder = yTabCompletePlaceholder,
-                notANumberErrorMessageKey = notANumberErrorMessageKey,
                 decimalNotAcceptedErrorMessageKey = decimalErrorMessageKey,
-                negativesNotAcceptedErrorMessageKey = negativesNotAcceptedErrorMessageKey,
-                numArg = numberArg,
-                errorMissingMessageKey = errorMissingYMessageKey,
                 furtherCondition = if (disableYCondition) null else yCondition,
-                transformValue = yTransformValue
+                transformValue = yTransformValue,
+                notANumberError = errorMessage(notANumberErrorMessageKey, numberArg),
+                negativeRule = ArgumentRule.create(negativesNotAcceptedErrorMessageKey),
+                onMissing = errorMessage(errorMissingYMessageKey)
             ).followedBy(
-                NumberArgument.number(
+                NumberArgument.integer(
                     key = "$keyPreset$zKey",
                     tabCompleterPlaceholder = zTabCompletePlaceholder,
-                    notANumberErrorMessageKey = notANumberErrorMessageKey,
                     decimalNotAcceptedErrorMessageKey = decimalErrorMessageKey,
-                    negativesNotAcceptedErrorMessageKey = negativesNotAcceptedErrorMessageKey,
-                    numArg = numberArg,
-                    errorMissingMessageKey = errorMissingZMessageKey,
                     furtherCondition = zCondition,
-                    transformValue = zTransformValue
+                    transformValue = zTransformValue,
+                    notANumberError = errorMessage(notANumberErrorMessageKey, numberArg),
+                    negativeRule = ArgumentRule.create(negativesNotAcceptedErrorMessageKey),
+                    onMissing = errorMessage(errorMissingZMessageKey)
                 )
             )
         )

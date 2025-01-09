@@ -8,9 +8,9 @@ import org.bukkit.Material
 object MaterialArgument {
     fun single(
         key: String = "material",
-        notMatchingKey: String = "material_not_matching",
+        notMatchingKey: String = "rooster.material.not_matching",
         notMatchingArg: String = "material",
-        onMissingKey: String = "material_missing",
+        onMissingKey: String = "rooster.material.missing_error",
         materialFilter: (Material) -> Boolean = { true }
     ): UnfinishedArgument {
         val materials = Material.entries.filter(materialFilter).map { it.name.lowercase() }
@@ -26,9 +26,9 @@ object MaterialArgument {
 
     fun multiple(
         key: String = "material",
-        notMatchingKey: String = "material_not_matching",
+        notMatchingKey: String = "rooster.material.not_matching",
         notMatchingArg: String = "material",
-        onMissingKey: String = "material_missing",
+        onMissingKey: String = "rooster.material.missing_error",
         materialFilter: (Material) -> Boolean = { true }
     ): UnfinishedArgument {
         val materials = Material.entries.filter(materialFilter).map { it.name.lowercase() }

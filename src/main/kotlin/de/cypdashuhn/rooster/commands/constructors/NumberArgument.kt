@@ -1,42 +1,86 @@
 package de.cypdashuhn.rooster.commands.constructors
 
-import de.cypdashuhn.rooster.commands.ArgumentInfo
-import de.cypdashuhn.rooster.commands.IsValidResult
-import de.cypdashuhn.rooster.commands.UnfinishedArgument
-import de.cypdashuhn.rooster.localization.tSend
+import de.cypdashuhn.rooster.commands.*
 
 object NumberArgument {
-    fun number(
+    fun integer(
         key: String = "number",
-        notANumberError: (ArgumentInfo) -> Unit,
-        acceptDecimals: Boolean = false,
-        decimalNotAcceptedError: (ArgumentInfo) -> Unit,
-        acceptNegatives: Boolean = false,
-        negativesNotAcceptedError: (ArgumentInfo) -> Unit,
+        notANumberError: (ArgumentInfo) -> Unit = errorMessage("rooster.number.not_a_number_error"),
+        negativeRule: ArgumentRule = ArgumentRule.NotAccepted(errorMessage("rooster.number.negative_error")),
+        zeroRule: ArgumentRule = ArgumentRule.NotAccepted(errorMessage("rooster.number.zero_error")),
+        decimalNotAcceptedErrorMessageKey: String? = "rooster.number.decimal_error",
         furtherCondition: ((ArgumentInfo) -> IsValidResult)? = null,
-        tabCompleterPlaceholder: String = "rooster.number_placeholder", /* set translations to stuff like "[number]" */
-        onMissing: (ArgumentInfo) -> Unit,
-        transformValue: (ArgumentInfo, Double) -> Double = { _, num -> num }
-    ): UnfinishedArgument {
-        return UnfinishedArgument(
+        /** set translations to stuff like "\[number]" */
+        tabCompleterPlaceholder: String = "rooster.number.placeholder",
+        onMissing: (ArgumentInfo) -> Unit = errorMessage("rooster.number.missing_error"),
+        transformValue: (ArgumentInfo, Int) -> Int = { _, num -> num }
+    ): IntegerArgumentType {
+        val arg = UnfinishedArgument(
             key = key,
             isValid = { argInfo ->
                 val arg = argInfo.arg
 
-                val doubleNum = arg.toDoubleOrNull() ?: return@UnfinishedArgument IsValidResult.Invalid(notANumberError)
-
-                if (!acceptDecimals && doubleNum % 1.0 != 0.0) {
-                    return@UnfinishedArgument IsValidResult.Invalid(decimalNotAcceptedError)
+                val rules = Rules(
+                    ArgumentRule.create(decimalNotAcceptedErrorMessageKey) to {
+                        arg.toDoubleOrNull() != null && arg.contains(
+                            '.'
+                        )
+                    },
+                    ArgumentRule.create(notANumberError) to { arg.toIntOrNull() == null }
+                ) {
+                    val intNum = arg.toInt()
+                    Rules(
+                        negativeRule to { intNum < 0 },
+                        zeroRule to { intNum == 0 },
+                        furtherCondition.toRule(argInfo)
+                    )
                 }
-                if (!acceptNegatives && doubleNum < 0) {
-                    return@UnfinishedArgument IsValidResult.Invalid(negativesNotAcceptedError)
+
+                rules.result()
+            },
+            transformValue = {
+                val num = it.arg.toInt()
+
+                transformValue(it, num)
+            },
+            onMissing = onMissing,
+            suggestions = { listOf(tabCompleterPlaceholder) }
+        )
+        return IntegerArgumentType(arg, key)
+    }
+
+    class IntegerArgumentType(
+        arg: UnfinishedArgument,
+        argKey: String
+    ) : SimpleArgumentType<Int>("Integer", arg, argKey)
+
+    fun double(
+        key: String = "number",
+        notANumberError: (ArgumentInfo) -> Unit = errorMessage("rooster.number.not_a_number_error"),
+        negativeRule: ArgumentRule = ArgumentRule.NotAccepted(errorMessage("rooster.number.negative_error")),
+        zeroRule: ArgumentRule = ArgumentRule.Accepted,
+        furtherCondition: ((ArgumentInfo) -> IsValidResult)? = null,
+        /** set translations to stuff like "\[number]" */
+        tabCompleterPlaceholder: String = "rooster.number.placeholder",
+        onMissing: (ArgumentInfo) -> Unit,
+        transformValue: (ArgumentInfo, Double) -> Double = { _, num -> num }
+    ): DoubleArgumentType {
+        val arg = UnfinishedArgument(
+            key = key,
+            isValid = { argInfo ->
+                val arg = argInfo.arg
+
+                val rules = Rules(
+                    ArgumentRule.create(notANumberError) to { arg.toDoubleOrNull() == null }
+                ) {
+                    val intNum = arg.toDouble()
+                    Rules(
+                        negativeRule to { intNum < 0 },
+                        furtherCondition.toRule(argInfo)
+                    )
                 }
 
-                furtherCondition?.let {
-                    return@UnfinishedArgument furtherCondition(argInfo)
-                }
-
-                IsValidResult.Valid()
+                rules.result()
             },
             transformValue = {
                 val num = it.arg.toDouble()
@@ -46,37 +90,11 @@ object NumberArgument {
             onMissing = onMissing,
             suggestions = { listOf(tabCompleterPlaceholder) }
         )
+        return DoubleArgumentType(arg, key)
     }
 
-    fun number(
-        key: String = "number",
-        notANumberErrorMessageKey: String = "rooster.not_a_number",
-        decimalNotAcceptedErrorMessageKey: String? = null,
-        negativesNotAcceptedErrorMessageKey: String? = null,
-        numArg: String = "num",
-        furtherCondition: ((ArgumentInfo) -> IsValidResult)? = null,
-        /** set translations to stuff like "\[number]" */
-        tabCompleterPlaceholder: String = "rooster.number_placeholder",
-        errorMissingMessageKey: String = "rooster.error_missing_num",
-        transformValue: (ArgumentInfo, Double) -> Double = { _, num -> num }
-    ): UnfinishedArgument {
-        return number(
-            key = key,
-            notANumberError = { it.sender.tSend(notANumberErrorMessageKey, numArg to it.arg) },
-            acceptDecimals = decimalNotAcceptedErrorMessageKey == null,
-            decimalNotAcceptedError = { it.sender.tSend(decimalNotAcceptedErrorMessageKey ?: "", numArg to it.arg) },
-            acceptNegatives = negativesNotAcceptedErrorMessageKey == null,
-            negativesNotAcceptedError = {
-                it.sender.tSend(
-                    negativesNotAcceptedErrorMessageKey
-                        ?: throw IllegalStateException("negativesNotAcceptedErrorMessageKey is null"),
-                    numArg to it.arg
-                )
-            },
-            furtherCondition = furtherCondition,
-            tabCompleterPlaceholder = tabCompleterPlaceholder,
-            onMissing = { it.sender.tSend(errorMissingMessageKey) },
-            transformValue = transformValue
-        )
-    }
+    class DoubleArgumentType(
+        arg: UnfinishedArgument,
+        argKey: String
+    ) : SimpleArgumentType<Double>("Double", arg, argKey)
 }

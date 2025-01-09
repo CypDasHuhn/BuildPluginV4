@@ -46,7 +46,8 @@ object NameArgument {
         extraQuery: Op<Boolean>? = null,
         isValid: ((ArgumentInfo) -> IsValidResult)? = null,
         key: String = "name",
-        uniqueErrorKey: String = "rooster_name_used"
+        uniqueErrorKey: String = "rooster_name_used",
+        nameArg: String = "name"
     ): UnfinishedArgument {
         return UnfinishedArgument(
             key = key,
@@ -57,7 +58,7 @@ object NameArgument {
                     extraQuery?.let { query = query and it }
 
                     if (table.selectAll().where { query }.firstOrNull() != null) {
-                        IsValidResult.Invalid { info -> info.sender.tSend(uniqueErrorKey) }
+                        IsValidResult.Invalid { info -> info.sender.tSend(uniqueErrorKey, nameArg to it.arg) }
                     } else {
                         isValid?.invoke(it) ?: IsValidResult.Valid()
                     }

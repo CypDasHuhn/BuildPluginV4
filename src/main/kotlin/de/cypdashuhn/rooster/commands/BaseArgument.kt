@@ -142,6 +142,26 @@ abstract class BaseArgument(
         ).also { it.internalLastChange = internalLastChange }
     }
 
+    fun displayPaths(): List<String> {
+        val paths = mutableListOf<String>()
+
+        fun traverse(node: BaseArgument, currentPath: String) {
+            val newPath = if (currentPath.isEmpty()) node.key else "$currentPath ${node.key}"
+
+            if (node.onExecute != null || node.followedBy == null) {
+                paths.add(newPath)
+            }
+
+            // Recursively traverse children if not null
+            node.followedBy?.forEach { child ->
+                traverse(child, newPath)
+            }
+        }
+
+        traverse(this, "")
+        return paths
+    }
+
     protected fun appendAtLastChange(changeArgument: (BaseArgument) -> Unit): BaseArgument {
         var currentArgument: BaseArgument = this
         var noChild = false

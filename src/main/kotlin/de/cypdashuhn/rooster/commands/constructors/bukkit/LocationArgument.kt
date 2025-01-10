@@ -63,9 +63,9 @@ object LocationArgument {
             decimalNotAcceptedErrorMessageKey = decimalErrorMessageKey,
             furtherCondition = xCondition,
             transformValue = xTransformValue,
-            notANumberError = errorMessage(notANumberErrorMessageKey, numberArg),
+            notANumberError = playerMessage(notANumberErrorMessageKey, numberArg),
             negativeRule = ArgumentRule.create(negativesNotAcceptedErrorMessageKey),
-            onMissing = errorMessage(errorMissingXMessageKey)
+            onMissing = playerMessage(errorMissingXMessageKey)
         ).followedBy(
             NumberArgument.integer(
                 key = "$keyPreset$yKey",
@@ -73,9 +73,9 @@ object LocationArgument {
                 decimalNotAcceptedErrorMessageKey = decimalErrorMessageKey,
                 furtherCondition = if (disableYCondition) null else yCondition,
                 transformValue = yTransformValue,
-                notANumberError = errorMessage(notANumberErrorMessageKey, numberArg),
+                notANumberError = playerMessage(notANumberErrorMessageKey, numberArg),
                 negativeRule = ArgumentRule.create(negativesNotAcceptedErrorMessageKey),
-                onMissing = errorMessage(errorMissingYMessageKey)
+                onMissing = playerMessage(errorMissingYMessageKey)
             ).followedBy(
                 NumberArgument.integer(
                     key = "$keyPreset$zKey",
@@ -83,9 +83,9 @@ object LocationArgument {
                     decimalNotAcceptedErrorMessageKey = decimalErrorMessageKey,
                     furtherCondition = zCondition,
                     transformValue = zTransformValue,
-                    notANumberError = errorMessage(notANumberErrorMessageKey, numberArg),
+                    notANumberError = playerMessage(notANumberErrorMessageKey, numberArg),
                     negativeRule = ArgumentRule.create(negativesNotAcceptedErrorMessageKey),
-                    onMissing = errorMessage(errorMissingZMessageKey)
+                    onMissing = playerMessage(errorMissingZMessageKey)
                 )
             )
         )

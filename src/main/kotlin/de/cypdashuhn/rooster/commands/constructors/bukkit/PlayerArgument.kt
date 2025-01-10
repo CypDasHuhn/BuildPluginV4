@@ -1,12 +1,14 @@
 package de.cypdashuhn.rooster.commands.constructors.bukkit
 
+import de.cypdashuhn.rooster.commands.SimpleArgumentType
 import de.cypdashuhn.rooster.commands.UnfinishedArgument
 import de.cypdashuhn.rooster.commands.constructors.ListArgument
 import de.cypdashuhn.rooster.localization.tSend
 import org.bukkit.Bukkit
+import org.bukkit.World
+import org.bukkit.entity.Player
 
 object PlayerArgument {
-
     fun single(
         key: String = "player",
         notMatchingKey: String = "rooster.player.not_matching",
@@ -21,6 +23,8 @@ object PlayerArgument {
         )
     }
 
+    class PlayerArgumentType(argument: UnfinishedArgument, argKey: String) : SimpleArgumentType<Player>("Player", argument, argKey)
+
     fun multiple(
         key: String = "player",
         notMatchingKey: String = "rooster.player.not_matching",
@@ -34,4 +38,6 @@ object PlayerArgument {
             onMissing = { it.sender.tSend(onMissingKey) },
         )
     }
+
+    class PlayerListArgumentType(argument: UnfinishedArgument, argKey: String) : SimpleArgumentType<List<Player>>("PlayerList", argument, argKey)
 }

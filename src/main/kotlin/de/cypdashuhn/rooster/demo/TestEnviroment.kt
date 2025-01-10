@@ -14,8 +14,8 @@ object TestInterfaces : RoosterCommand("testInterfaces", onStart = { it is Playe
             .followedBy(Arguments.list.single(
                 key = INTERFACE_KEY,
                 list = Rooster.registeredInterfaces.map { it.interfaceName },
-                notMatchingError = { info, arg -> errorMessage("rooster.interface_not_found") },
-                onMissing = errorMessage("rooster.interface_missing"),
+                notMatchingError = { info, arg -> playerMessage("rooster.interface_not_found") },
+                onMissing = playerMessage("rooster.interface_missing"),
                 transformValue = { _, arg ->
                     Rooster.registeredInterfaces.first { it.interfaceName == arg }
                 }

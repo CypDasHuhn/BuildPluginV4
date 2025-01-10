@@ -22,7 +22,12 @@ abstract class LocaleProvider(open var locales: Map<Language, Locale>, open var 
         return playerLanguage(player) ?: getGlobalLanguage()
     }
 
+    fun getLanguageCodes(): List<String> {
+        return locales.keys.map { it.uppercase().replace('_', '-') }
+    }
+
     fun init() {
+        // TODO("Add Correct Key")
         val registry: TranslationRegistry = TranslationRegistry.create(Key.key("myplugin"))
 
         locales.forEach { (language, locale) ->

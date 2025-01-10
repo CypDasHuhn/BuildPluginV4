@@ -19,10 +19,10 @@ object ListArgument {
         listFunc: (ArgumentInfo) -> List<String>,
         ignoreCase: Boolean = false,
         prefix: String = "",
-        notMatchingError: (ArgumentInfo, String) -> Unit = { info, _ -> errorMessage("rooster.list.not_matching")(info) },
+        notMatchingError: (ArgumentInfo, String) -> Unit = { info, _ -> playerMessage("rooster.list.not_matching")(info) },
         isEnabled: (ArgumentPredicate)? = { true },
         isTarget: (ArgumentPredicate) = { true },
-        onMissing: (ArgumentInfo) -> Unit = { info -> errorMessage("rooster.list.missing")(info) },
+        onMissing: (ArgumentInfo) -> Unit = { info -> playerMessage("rooster.list.missing")(info) },
         isValid: ((ArgumentInfo, String) -> IsValidResult)? = null,
         transformValue: ((ArgumentInfo, String) -> Any)? = null
     ): ListArgumentType {
@@ -62,10 +62,10 @@ object ListArgument {
         list: List<String>,
         ignoreCase: Boolean = false,
         prefix: String = "",
-        notMatchingError: (ArgumentInfo, String) -> Unit = { info, _ -> errorMessage("rooster.list.not_matching")(info) },
+        notMatchingError: (ArgumentInfo, String) -> Unit = { info, _ -> playerMessage("rooster.list.not_matching")(info) },
         isEnabled: (ArgumentPredicate)? = { true },
         isTarget: (ArgumentPredicate) = { true },
-        onMissing: (ArgumentInfo) -> Unit = { info -> errorMessage("rooster.list.missing")(info) },
+        onMissing: (ArgumentInfo) -> Unit = { info -> playerMessage("rooster.list.missing")(info) },
         isValid: ((ArgumentInfo, String) -> IsValidResult)? = null,
         transformValue: ((ArgumentInfo, String) -> Any)? = null
     ) = single(
@@ -175,7 +175,7 @@ object ListArgument {
                 }
             },
             key = key,
-            onMissing = errorMessage(errorMissingMessageKey),
+            onMissing = playerMessage(errorMissingMessageKey),
         )
 
         return DbArgumentType(arg, key)

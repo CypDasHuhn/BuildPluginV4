@@ -49,7 +49,7 @@ sealed class ArgumentRule {
     companion object {
         fun create(messageKey: String?): ArgumentRule {
             return if (messageKey == null) Accepted
-            else NotAccepted(errorMessage(messageKey))
+            else NotAccepted(playerMessage(messageKey))
         }
 
         fun create(error: ((ArgumentInfo) -> Unit)?): ArgumentRule {
@@ -59,10 +59,10 @@ sealed class ArgumentRule {
     }
 }
 
-fun errorMessage(errorMessageKey: String, arg: String = "arg"): (ArgumentInfo) -> Unit = {
-    it.sender.tSend(errorMessageKey, arg to it.arg)
+fun playerMessage(messageKey: String, arg: String = "arg"): (ArgumentInfo) -> Unit = {
+    it.sender.tSend(messageKey, arg to it.arg)
 }
 
-fun <T> typedErrorMessage(errorMessageKey: String, arg: String = "arg"): (ArgumentInfo, T) -> Unit = { info, _ ->
-    info.sender.tSend(errorMessageKey, arg to info.arg)
+fun <T> typedPlayerMessage(messageKey: String, arg: String = "arg"): (ArgumentInfo, T) -> Unit = { info, _ ->
+    info.sender.tSend(messageKey, arg to info.arg)
 }

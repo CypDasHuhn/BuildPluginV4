@@ -5,14 +5,14 @@ import de.cypdashuhn.rooster.commands.*
 object NumberArgument {
     fun integer(
         key: String = "number",
-        notANumberError: (ArgumentInfo) -> Unit = errorMessage("rooster.number.not_a_number_error"),
-        negativeRule: ArgumentRule = ArgumentRule.NotAccepted(errorMessage("rooster.number.negative_error")),
-        zeroRule: ArgumentRule = ArgumentRule.NotAccepted(errorMessage("rooster.number.zero_error")),
+        notANumberError: (ArgumentInfo) -> Unit = playerMessage("rooster.number.not_a_number_error"),
+        negativeRule: ArgumentRule = ArgumentRule.NotAccepted(playerMessage("rooster.number.negative_error")),
+        zeroRule: ArgumentRule = ArgumentRule.NotAccepted(playerMessage("rooster.number.zero_error")),
         decimalNotAcceptedErrorMessageKey: String? = "rooster.number.decimal_error",
         furtherCondition: ((ArgumentInfo) -> IsValidResult)? = null,
         /** set translations to stuff like "\[number]" */
         tabCompleterPlaceholder: String = "rooster.number.placeholder",
-        onMissing: (ArgumentInfo) -> Unit = errorMessage("rooster.number.missing_error"),
+        onMissing: (ArgumentInfo) -> Unit = playerMessage("rooster.number.missing_error"),
         transformValue: (ArgumentInfo, Int) -> Int = { _, num -> num }
     ): IntegerArgumentType {
         val arg = UnfinishedArgument(
@@ -56,8 +56,8 @@ object NumberArgument {
 
     fun double(
         key: String = "number",
-        notANumberError: (ArgumentInfo) -> Unit = errorMessage("rooster.number.not_a_number_error"),
-        negativeRule: ArgumentRule = ArgumentRule.NotAccepted(errorMessage("rooster.number.negative_error")),
+        notANumberError: (ArgumentInfo) -> Unit = playerMessage("rooster.number.not_a_number_error"),
+        negativeRule: ArgumentRule = ArgumentRule.NotAccepted(playerMessage("rooster.number.negative_error")),
         zeroRule: ArgumentRule = ArgumentRule.Accepted,
         furtherCondition: ((ArgumentInfo) -> IsValidResult)? = null,
         /** set translations to stuff like "\[number]" */

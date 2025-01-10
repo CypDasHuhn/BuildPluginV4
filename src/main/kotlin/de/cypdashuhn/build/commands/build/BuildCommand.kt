@@ -25,5 +25,5 @@ val frameArgument = Arguments.number.integer(
     negativeRule = ArgumentRule.create("build.frame.at_least_one"),
     zeroRule = ArgumentRule.create("build.frame.at_least_one"),
     tabCompleterPlaceholder = "build.frame.placeholder",
-    onMissing = errorMessage("build.frame.missing")
+    onMissing = playerMessage("build.frame.missing")
 )

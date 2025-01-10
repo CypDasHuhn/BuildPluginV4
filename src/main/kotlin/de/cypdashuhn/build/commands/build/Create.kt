@@ -3,7 +3,7 @@ package de.cypdashuhn.build.commands.build
 import de.cypdashuhn.build.actions.BuildManager
 import de.cypdashuhn.build.db.DbBuildsManager
 import de.cypdashuhn.rooster.commands.Arguments
-import de.cypdashuhn.rooster.commands.errorMessage
+import de.cypdashuhn.rooster.commands.playerMessage
 import de.cypdashuhn.rooster.localization.t
 import de.cypdashuhn.rooster.localization.tSend
 import org.bukkit.entity.Player
@@ -24,4 +24,4 @@ val create = Arguments.literal.single(name = t("build.create.label"), isEnabled 
 
         BuildManager.create(it.sender as Player, name)
     }
-    .onMissing(errorMessage("build_register_name_missing"))
+    .onMissing(playerMessage("build_register_name_missing"))

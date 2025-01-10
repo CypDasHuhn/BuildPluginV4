@@ -27,8 +27,8 @@ object LocationArgument {
          */
         negativesNotAcceptedErrorMessageKey: String? = null,
         errorMissingXMessageKey: String = "rooster.location.missing.x",
-        errorMissingYMessageKey: String = "rooster.location.missing.x",
-        errorMissingZMessageKey: String = "rooster.location.missing.x",
+        errorMissingYMessageKey: String = "rooster.location.missing.y",
+        errorMissingZMessageKey: String = "rooster.location.missing.z",
         xCondition: ((ArgumentInfo) -> IsValidResult)? = null,
         disableYCondition: Boolean = false,
         yCondition: ((ArgumentInfo) -> IsValidResult)? = { (sender, _, arg, _, _) ->

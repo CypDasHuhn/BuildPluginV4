@@ -24,7 +24,7 @@ val newFrame = listOf(
 
             (1..build.frameAmount).toList().map { it.toString() }
         },
-        notMatchingError = typedPlayerMessage("build.frame.not_matching", "frame"),
+        notMatchingError = playerMessageExtra("build.frame.not_matching", "frame"),
         onMissing = playerMessage("build.frame.missing")
     ).adapt({ it.toInt() })
 ).eachOnExecuteWithThis { info, self ->

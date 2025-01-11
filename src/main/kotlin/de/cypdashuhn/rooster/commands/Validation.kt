@@ -63,6 +63,6 @@ fun playerMessage(messageKey: String, arg: String = "arg"): (ArgumentInfo) -> Un
     it.sender.tSend(messageKey, arg to it.arg)
 }
 
-fun <T> typedPlayerMessage(messageKey: String, arg: String = "arg"): (ArgumentInfo, T) -> Unit = { info, _ ->
-    info.sender.tSend(messageKey, arg to info.arg)
+fun <T> playerMessageExtra(messageKey: String, arg: String = "arg"): (ArgumentInfo, T) -> Unit = { info, field ->
+    info.sender.tSend(messageKey, arg to field.toString())
 }

@@ -9,7 +9,6 @@ import java.net.http.WebSocket.Listener
 object ChatListener : Listener {
     @EventHandler
     fun onChat(event: AsyncChatEvent) {
-        val player = event.player
-        val message = event.message()
+        ChatManager.callListener(event)
     }
 }

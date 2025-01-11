@@ -15,7 +15,7 @@ val create = Arguments.literal.single(name = t("build.create.label"), isEnabled 
             key = buildNameKey,
             table = DbBuildsManager.Builds,
             targetColumn = DbBuildsManager.Builds.name,
-            uniqueErrorKey = "build.create.name_used"
+            uniqueErrorKey = "build.create.name_used_error"
         )
     ).onExecute {
         val name = it.context[buildNameKey] as String

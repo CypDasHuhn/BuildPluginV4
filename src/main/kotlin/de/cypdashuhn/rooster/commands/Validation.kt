@@ -47,9 +47,9 @@ sealed class ArgumentRule {
     }
 
     companion object {
-        fun create(messageKey: String?): ArgumentRule {
+        fun create(messageKey: String?, arg: String = "arg"): ArgumentRule {
             return if (messageKey == null) Accepted
-            else NotAccepted(playerMessage(messageKey))
+            else NotAccepted(playerMessage(messageKey, arg))
         }
 
         fun create(error: ((ArgumentInfo) -> Unit)?): ArgumentRule {

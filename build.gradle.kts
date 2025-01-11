@@ -65,7 +65,8 @@ bukkit {
     apiVersion = "1.21.3"
 
     commands {
-        register("build")
+        register("!build")
+        register("!settings")
     }
 
     permissions {

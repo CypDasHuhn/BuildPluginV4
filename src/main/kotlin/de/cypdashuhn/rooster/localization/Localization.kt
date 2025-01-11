@@ -117,6 +117,10 @@ fun CommandSender.tSend(messageKey: String, vararg replacements: Pair<String, St
     this.sendMessage(t(messageKey, this.language(), *replacements))
 }
 
+fun CommandSender.tString(messageKey: String, vararg replacements: Pair<String, String?>): String {
+    return t(messageKey, this.language(), *replacements).content()
+}
+
 fun CommandSender.language(): Language {
     return if (this is Player) localeProvider.getLanguage(this)
     else localeProvider.getGlobalLanguage()
@@ -167,17 +171,9 @@ fun translateLanguage(message: String, language: Language?, vararg replacements:
 }
 
 fun main() {
-    val language = "en"
+    val language = "en_us"
 
-    val r1 = t("test")
-    val r2 = t("test", "a" to "b")
-    val r5 = t("test", "a" to "b", "c" to "d")
+    val message = t("rooster.language.changed", language, "language" to "en_us")
 
-    val t1 = transformMessage(r1, language)
-    val t2 = transformMessage(r2, language)
-    val t3 = transformMessage("test", language)
-    val t4 = transformMessage("!<t>test", language)
-    val t5 = transformMessage(r5, language)
-
-    val s = ""
+    println(message.content())
 }

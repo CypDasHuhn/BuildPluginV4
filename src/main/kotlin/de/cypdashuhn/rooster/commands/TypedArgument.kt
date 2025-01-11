@@ -65,6 +65,7 @@ fun <T, E> TypedArgument<T>.adapt(
             if (result is TypeResult.Failure) return TypeResult.Failure(result.exception, result.action)
             val value = (result as TypeResult.Success).value
 
+            adapter(value)
             val adapted = adapter(value) ?: return adapterFailure()
             return TypeResult.Success(adapted)
         }

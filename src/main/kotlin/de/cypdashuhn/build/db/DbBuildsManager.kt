@@ -9,6 +9,7 @@ import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.joml.Vector3d
 
 object DbBuildsManager {
     @RoosterTable
@@ -43,6 +44,9 @@ object DbBuildsManager {
         var morphType: BuildType
             get() = BuildType.entries.first { it.isMorph == isMorph }
             set(value) { isMorph = value.isMorph }
+
+        val dimensions: Vector3d
+            get() = Vector3d(xLength.toDouble(), yLength.toDouble(), zLength.toDouble())
     }
 
     enum class BuildType(val isMorph: Boolean?) {
@@ -64,6 +68,12 @@ object DbBuildsManager {
                 this.generalDuration = 100
                 this.morphType
             }
+        }
+    }
+
+    fun delete(build: Build) {
+        transaction {
+            build.delete()
         }
     }
 }

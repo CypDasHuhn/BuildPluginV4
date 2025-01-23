@@ -20,13 +20,21 @@ abstract class TypedArgument<T>(
 ) {
     abstract fun value(sender: CommandSender, context: CommandContext): TypeResult<T>
 
-    fun <T> onExecuteWithThis(onExecuteCallback: (InvokeInfo, TypedArgument<T>) -> Unit): TypedArgument<T> {
-        return this.onExecuteTyped { onExecuteCallback(it, this as TypedArgument<T>) }
+    fun onExecuteWithThis(onExecuteCallback: (InvokeInfo, TypedArgument<T>) -> Unit): TypedArgument<T> {
+        return this.onExecuteTyped { onExecuteCallback(it, this) }
     }
 
 
-    fun <T> onExecuteTyped(onExecute: ((InvokeInfo) -> Unit)): TypedArgument<T> {
-        return appendChange { it.onExecute = onExecute } as TypedArgument<T>
+    fun onExecuteTyped(onExecute: ((InvokeInfo) -> Unit)): TypedArgument<T> {
+        return appendChange { it.onExecute = onExecute }
+    }
+
+    fun onExecuteWithThisFinished(onExecuteCallback: (InvokeInfo, TypedArgument<T>) -> Unit): Argument {
+        return this.onExecute { onExecuteCallback(it, this) }
+    }
+
+    override fun copy(): TypedArgument<T> {
+        return this
     }
 }
 

@@ -70,4 +70,8 @@ open class UnfinishedArgument : BaseArgument {
             )
         }
     }
+
+    open fun copy(): UnfinishedArgument {
+        return toUnfinishedArgument()
+    }
 }

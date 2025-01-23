@@ -2,7 +2,6 @@ package de.cypdashuhn.rooster.commands.constructors.bukkit
 
 import de.cypdashuhn.rooster.commands.*
 import de.cypdashuhn.rooster.commands.constructors.NumberArgument
-import de.cypdashuhn.rooster.localization.tSend
 import de.cypdashuhn.rooster.region.Region
 import de.cypdashuhn.rooster.util.location
 import org.bukkit.Location
@@ -86,7 +85,12 @@ object LocationArgument {
         keyPreset: String = "",
     ): RegionArgumentType {
         val loc1Arg = location(keyPreset = "${keyPreset}first_")
-        val loc2Arg = location(keyPreset = "${keyPreset}second_")
+        val loc2Arg = location(
+            keyPreset = "${keyPreset}second_",
+            xTabCompletePlaceholder = "X2",
+            yTabCompletePlaceholder = "Y2",
+            zTabCompletePlaceholder = "Z2"
+        )
 
         return RegionArgumentType(loc1Arg.followedBy(loc2Arg), loc1Arg, loc2Arg)
     }

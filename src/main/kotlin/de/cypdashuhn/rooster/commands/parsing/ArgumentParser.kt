@@ -10,8 +10,18 @@ import de.cypdashuhn.rooster.localization.transformMessage
 import org.bukkit.command.CommandSender
 
 object ArgumentParser {
-    private inline infix fun <reified E> List<E>.contentEquals(list: List<E>): Boolean {
-        return this.toTypedArray() contentEquals list.toTypedArray()
+    private inline infix fun <reified E> List<E>.contentEqualsOrWithoutLast(other: List<E>): Boolean {
+        val comparisonLength = when (this.size - other.size) {
+            0 -> this.size
+            1 -> other.size
+            else -> return false
+        }
+
+        for (i in 0 until comparisonLength) {
+            if (this[i] != other[i]) return false
+        }
+
+        return true
     }
 
     val defaultErrorArgumentsOverflow: (ArgumentInfo) -> Unit =
@@ -57,7 +67,7 @@ object ArgumentParser {
     private const val CACHE_KEY = "rooster_arguments_cache"
 
     private fun List<String>.withoutLast(): List<String> {
-        return this.toTypedArray().copyOfRange(0, this.size - 1).toList()
+        return if (this.isNotEmpty()) this.subList(0, this.size - 1) else emptyList()
     }
 
     data class CacheInfo(
@@ -85,7 +95,7 @@ object ArgumentParser {
 
         /* Prepends label to arguments
         "/label [...args]" -> [label, ...args]  */
-        val stringArguments = rawStringArguments.toMutableList().also { it.add(0, label) }.toList()
+        val stringArguments = listOf(label) + rawStringArguments
 
         var headArgument = topArgument.command as BaseArgument
         var arguments = mutableListOf(headArgument)
@@ -93,30 +103,27 @@ object ArgumentParser {
         var context = CommandContext()
 
         var cachePosition: Int? = null
-        val cacheInfo = Rooster.cache.getIfPresent(CACHE_KEY, sender) as CacheInfo?
 
-        if (cacheInfo != null && commandParseType == CommandParseType.TabCompleter && false) {
-            if (cacheInfo.stringArguments.withoutLast()
-                contentEquals
-                stringArguments.withoutLast() ||
-                cacheInfo.stringArguments
-                contentEquals
-                stringArguments.withoutLast()
-            ) {
-                arguments = cacheInfo.arguments
-                headArgument = cacheInfo.headArgument
-                onArgumentOverflow = cacheInfo.errorArgumentOverflow
-                context = cacheInfo.context
+        if (commandParseType == CommandParseType.TabCompleter) {
+            val cacheInfo = Rooster.cache.getIfPresent(CACHE_KEY, sender) as CacheInfo?
 
-                cachePosition = when {
-                    stringArguments.last().isBlank() -> cacheInfo.stringArguments.size - 1
-                    else -> cacheInfo.stringArguments.size - 1
+            cacheInfo?.let {
+                if (it.stringArguments contentEqualsOrWithoutLast stringArguments) {
+                    arguments = cacheInfo.arguments
+                    headArgument = cacheInfo.headArgument
+                    onArgumentOverflow = cacheInfo.errorArgumentOverflow
+                    context = cacheInfo.context
+
+                    cachePosition = when {
+                        stringArguments.last().isBlank() -> cacheInfo.stringArguments.size
+                        else -> cacheInfo.stringArguments.size - 1
+                    }
                 }
             }
         }
 
         for ((index, stringArgument) in stringArguments.withIndex()) {
-            if (cachePosition != null && cachePosition > index) {
+            if (cachePosition != null && cachePosition!! > index) {
                 continue
             }
 
@@ -137,7 +144,11 @@ object ArgumentParser {
 
             fun currentTabCompletions(): List<String> {
                 return arguments
-                    .filter { it.isTarget(argumentInfo) && (it.isEnabled == null || it.isEnabled!!(argumentInfo)) && it.suggestions != null }
+                    .filter {
+                        it.isTarget(argumentInfo) &&
+                                (it.isEnabled == null || it.isEnabled!!(argumentInfo)) &&
+                                it.suggestions != null
+                    }
                     .flatMap { it.suggestions!!(argumentInfo) }
                     .map { transformMessage(it, sender.language()) }
             }
@@ -155,11 +166,7 @@ object ArgumentParser {
                     CommandParseType.Invocation -> {
                         arguments.forEach { arg ->
                             arg.onMissing?.let {
-                                return ReturnResult(success = false) {
-                                    it(
-                                        argumentInfo
-                                    )
-                                }
+                                return ReturnResult(success = false) { it(argumentInfo) }
                             }
                         }
                         requireNotNull(headArgument.onMissingChild) { "Head Argument error passed. If head doesn't have message, Argument structure is wrong." }
@@ -232,10 +239,8 @@ object ArgumentParser {
                         true -> headArgument
                         false -> currentArgument
                     }
-                    if (comparativeArgument.onExecute != null) {
-                        return ReturnResult(success = true) {
-                            comparativeArgument.onExecute!!(InvokeInfo(sender, context, stringArguments))
-                        }
+                    comparativeArgument.onExecute?.let {
+                        return ReturnResult(success = true) { it(InvokeInfo(sender, context, stringArguments)) }
                     }
 
                     // error handling

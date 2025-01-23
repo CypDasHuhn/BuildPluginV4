@@ -2,7 +2,6 @@ package de.cypdashuhn.rooster.commands.constructors.bukkit
 
 import de.cypdashuhn.rooster.commands.*
 import de.cypdashuhn.rooster.commands.constructors.NumberArgument
-import de.cypdashuhn.rooster.localization.tSend
 import de.cypdashuhn.rooster.region.Region
 import de.cypdashuhn.rooster.util.location
 import org.bukkit.Location
@@ -31,23 +30,12 @@ object LocationArgument {
         errorMissingZMessageKey: String = "rooster.location.missing.z",
         xCondition: ((ArgumentInfo) -> IsValidResult)? = null,
         disableYCondition: Boolean = false,
-        yCondition: ((ArgumentInfo) -> IsValidResult)? = { (sender, _, arg, _, _) ->
-            val num = arg.toDouble()
-            when {
-                num <= -65.0 -> {
-                    IsValidResult.Invalid { sender.tSend("rooster.location.y.too_low", numberArg to arg) }
-                }
-
-                num >= 321.0 -> {
-                    IsValidResult.Invalid {
-                        sender.tSend("rooster.location.y.too_high", numberArg to arg)
-                    }
-                }
-
-                else -> {
-                    IsValidResult.Valid()
-                }
-            }
+        yCondition: ((ArgumentInfo) -> IsValidResult)? = { info ->
+            val num = info.arg.toDouble()
+            Rules(
+                ArgumentRule.create("rooster.location.y.too_low") to { num <= -65.0 },
+                ArgumentRule.create("rooster.location.y.too_high") to { num >= 321.0 }
+            ).result()
         },
         zCondition: ((ArgumentInfo) -> IsValidResult)? = null,
         xTransformValue: ((ArgumentInfo, Int) -> Int) = { _, num -> num },
@@ -97,7 +85,12 @@ object LocationArgument {
         keyPreset: String = "",
     ): RegionArgumentType {
         val loc1Arg = location(keyPreset = "${keyPreset}first_")
-        val loc2Arg = location(keyPreset = "${keyPreset}second_")
+        val loc2Arg = location(
+            keyPreset = "${keyPreset}second_",
+            xTabCompletePlaceholder = "X2",
+            yTabCompletePlaceholder = "Y2",
+            zTabCompletePlaceholder = "Z2"
+        )
 
         return RegionArgumentType(loc1Arg.followedBy(loc2Arg), loc1Arg, loc2Arg)
     }

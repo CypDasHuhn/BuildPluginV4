@@ -20,12 +20,8 @@ object NumberArgument {
             isValid = { argInfo ->
                 val arg = argInfo.arg
 
-                val rules = Rules(
-                    ArgumentRule.create(decimalNotAcceptedErrorMessageKey) to {
-                        arg.toDoubleOrNull() != null && arg.contains(
-                            '.'
-                        )
-                    },
+                Rules(
+                    ArgumentRule.create(decimalNotAcceptedErrorMessageKey) to { arg.toDoubleOrNull() != null && arg.toDouble() % 1 != 0.0 },
                     ArgumentRule.create(notANumberError) to { arg.toIntOrNull() == null }
                 ) {
                     val intNum = arg.toInt()
@@ -34,9 +30,7 @@ object NumberArgument {
                         zeroRule to { intNum == 0 },
                         furtherCondition.toRule(argInfo)
                     )
-                }
-
-                rules.result()
+                }.result()
             },
             transformValue = {
                 val num = it.arg.toInt()

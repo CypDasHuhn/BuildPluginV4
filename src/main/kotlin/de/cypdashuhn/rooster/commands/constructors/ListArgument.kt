@@ -19,7 +19,11 @@ object ListArgument {
         listFunc: (ArgumentInfo) -> List<String>,
         ignoreCase: Boolean = false,
         prefix: String = "",
-        notMatchingError: (ArgumentInfo, String) -> Unit = { info, _ -> playerMessage("rooster.list.not_matching")(info) },
+        notMatchingError: (ArgumentInfo, String) -> Unit = { info, _ ->
+            playerMessage("rooster.list.not_matching_error", "entry")(
+                info
+            )
+        },
         isEnabled: (ArgumentPredicate)? = { true },
         isTarget: (ArgumentPredicate) = { true },
         onMissing: (ArgumentInfo) -> Unit = { info -> playerMessage("rooster.list.missing")(info) },
@@ -62,7 +66,11 @@ object ListArgument {
         list: List<String>,
         ignoreCase: Boolean = false,
         prefix: String = "",
-        notMatchingError: (ArgumentInfo, String) -> Unit = { info, _ -> playerMessage("rooster.list.not_matching")(info) },
+        notMatchingError: (ArgumentInfo, String) -> Unit = { info, _ ->
+            playerMessage("rooster.list.not_matching_error")(
+                info
+            )
+        },
         isEnabled: (ArgumentPredicate)? = { true },
         isTarget: (ArgumentPredicate) = { true },
         onMissing: (ArgumentInfo) -> Unit = { info -> playerMessage("rooster.list.missing")(info) },
@@ -96,10 +104,10 @@ object ListArgument {
         displayField: Column<String>,
         filter: ((ArgumentInfo, E) -> Boolean)? = null,
         ignoreCase: Boolean = false,
-        key: String,
-        errorInvalidMessageKey: String,
+        key: String = "list",
+        errorInvalidMessageKey: String = "rooster.list.invalid_error",
         argKey: String = "arg",
-        errorMissingMessageKey: String,
+        errorMissingMessageKey: String = "rooster.list.missing_error",
         isArgument: ArgumentPredicate = { true },
         isValidCompleter: ArgumentPredicate? = null,
         errorArgumentOverflow: ((ArgumentInfo) -> Unit)? = null,
@@ -109,25 +117,27 @@ object ListArgument {
             isTarget = isArgument,
             isEnabled = isValidCompleter,
             transformValue = { argInfo ->
-                val condition =
-                    if (ignoreCase) displayField.lowerCase() eq argInfo.arg.lowercase() else displayField eq argInfo.arg
+                transaction {
+                    val condition =
+                        if (ignoreCase) displayField.lowerCase() eq argInfo.arg.lowercase() else displayField eq argInfo.arg
 
-                val query = entity.table.selectAll()
+                    val query = entity.table.selectAll()
 
-                val entries = query.where { condition }
+                    val entries = query.where { condition }
 
-                val matchingEntries = entity.wrapRows(entries)
+                    val matchingEntries = entity.wrapRows(entries)
 
-                val filteredEntries = if (filter != null) matchingEntries.filter {
-                    filter(argInfo, it)
-                } else matchingEntries
+                    val filteredEntries = if (filter != null) matchingEntries.filter {
+                        filter(argInfo, it)
+                    } else matchingEntries
 
-                val entry = filteredEntries.firstOrNull()
-                requireNotNull(entry) { "Entry should've been canceled before'" }
+                    val entry = filteredEntries.firstOrNull()
+                    requireNotNull(entry) { "Entry should've been canceled before'" }
 
-                val arg = transformValue(entry)
+                    val arg = transformValue(entry)
 
-                arg
+                    arg
+                }
             },
             onArgumentOverflow = errorArgumentOverflow,
             isValid = { (sender, args, arg, index, values) ->

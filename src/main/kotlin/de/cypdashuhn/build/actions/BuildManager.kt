@@ -1,26 +1,20 @@
 package de.cypdashuhn.build.actions
 
-import com.sk89q.worldedit.bukkit.BukkitAdapter
-import com.sk89q.worldedit.regions.CuboidRegion
 import de.cypdashuhn.build.db.DbBuildsManager
 import de.cypdashuhn.build.db.FrameManager
 import de.cypdashuhn.rooster.core.Rooster.plugin
-import de.cypdashuhn.rooster.localization.tSend
 import de.cypdashuhn.rooster.region.Region
-import de.cypdashuhn.rooster_worldedit.adapter.worldEditSelection
+import de.cypdashuhn.rooster.region.compareVectors
+import de.cypdashuhn.rooster_worldedit.adapter.toWorldEditRegion
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.entity.Player
 
 object BuildManager {
-    fun create(player: Player, buildName: String) {
-        val region = player.worldEditSelection() ?: run {
-            player.tSend("build_missing_selection")
-            return
-        }
-
-        DbBuildsManager.register(buildName, region.dimensions.toVector3())
-        SchematicManager.save(buildName, 1, region)
+    fun create(player: Player, buildName: String, region: Region) {
+        DbBuildsManager.register(buildName, region.dimensions)
+        FrameManager.newFrame(buildName, 1)
+        SchematicManager.save(buildName, 1, region.toWorldEditRegion())
     }
 
     fun load(player: Player, build: DbBuildsManager.Build, frame: Int, pos1: Location, pos2: Location?) {
@@ -32,13 +26,10 @@ object BuildManager {
         val generalDuration = build.generalDuration
 
         if (pos2 != null) {
-            val region = region(pos1, pos2)
-            val dimensions = region.dimensions
+            val region = Region(pos1, pos2)
 
-            if (build.xLength != dimensions.x() || build.yLength != dimensions.y() || build.zLength != dimensions.z()) {
-                player.tSend("build_dimensions_mismatch")
-                return
-            }
+            val canProceed = compareVectors(player, build.dimensions, region.dimensions)
+            if (!canProceed) return
         }
 
         val corner = if (pos2 == null) pos1 else Region(pos1, pos2).min
@@ -70,33 +61,26 @@ object BuildManager {
     fun save(player: Player, build: DbBuildsManager.Build, frame: Int, pos1: Location, pos2: Location?) {
         val frames = build.frameAmount
 
-        if (frame > frames) {
-            player.tSend("build_frame_too_high")
-            return
-        }
+        assert(frame in 1..frames + 1) { "Frame number must be between 1 and ${frames + 1}" }
 
         if (pos2 != null) {
-            val region = region(pos1, pos2)
-            val dimensions = region.dimensions
+            val region = Region(pos1, pos2)
 
-            if (build.xLength != dimensions.x() || build.yLength != dimensions.y() || build.zLength != dimensions.z()) {
-                player.tSend("build_dimensions_mismatch")
-                return
-            }
+            val canProceed = compareVectors(player, build.dimensions, region.dimensions)
+            if (!canProceed) return
+        }
+        if (frame == frames + 1) {
+            FrameManager.newFrame(build.name, frame)
         }
 
         val corner = if (pos2 == null) pos1 else Region(pos1, pos2).min
         val secondCorner =
             pos2 ?: pos1.add(build.xLength.toDouble(), build.yLength.toDouble(), build.zLength.toDouble())
 
-        SchematicManager.save(build.name, frame, region(corner, secondCorner))
+        SchematicManager.save(build.name, frame, Region(corner, secondCorner).toWorldEditRegion())
     }
-}
 
-fun region(pos1: Location, pos2: Location): CuboidRegion {
-    return CuboidRegion(
-        BukkitAdapter.adapt(pos1.world),
-        BukkitAdapter.asBlockVector(pos1),
-        BukkitAdapter.asBlockVector(pos2)
-    )
+    fun delete(build: DbBuildsManager.Build) {
+        DbBuildsManager.delete(build)
+    }
 }

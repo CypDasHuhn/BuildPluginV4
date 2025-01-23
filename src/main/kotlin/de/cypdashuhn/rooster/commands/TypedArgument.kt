@@ -20,13 +20,21 @@ abstract class TypedArgument<T>(
 ) {
     abstract fun value(sender: CommandSender, context: CommandContext): TypeResult<T>
 
-    fun <T> onExecuteWithThis(onExecuteCallback: (InvokeInfo, TypedArgument<T>) -> Unit): TypedArgument<T> {
-        return this.onExecuteTyped { onExecuteCallback(it, this as TypedArgument<T>) }
+    fun onExecuteWithThis(onExecuteCallback: (InvokeInfo, TypedArgument<T>) -> Unit): TypedArgument<T> {
+        return this.onExecuteTyped { onExecuteCallback(it, this) }
     }
 
 
-    fun <T> onExecuteTyped(onExecute: ((InvokeInfo) -> Unit)): TypedArgument<T> {
-        return appendChange { it.onExecute = onExecute } as TypedArgument<T>
+    fun onExecuteTyped(onExecute: ((InvokeInfo) -> Unit)): TypedArgument<T> {
+        return appendChange { it.onExecute = onExecute }
+    }
+
+    fun onExecuteWithThisFinished(onExecuteCallback: (InvokeInfo, TypedArgument<T>) -> Unit): Argument {
+        return this.onExecute { onExecuteCallback(it, this) }
+    }
+
+    override fun copy(): TypedArgument<T> {
+        return this
     }
 }
 
@@ -65,6 +73,7 @@ fun <T, E> TypedArgument<T>.adapt(
             if (result is TypeResult.Failure) return TypeResult.Failure(result.exception, result.action)
             val value = (result as TypeResult.Success).value
 
+            adapter(value)
             val adapted = adapter(value) ?: return adapterFailure()
             return TypeResult.Success(adapted)
         }

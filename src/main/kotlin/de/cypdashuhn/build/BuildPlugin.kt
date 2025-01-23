@@ -8,10 +8,12 @@ import de.cypdashuhn.rooster.localization.provider.LocaleProvider
 import de.cypdashuhn.rooster.localization.provider.SqlLocaleProvider
 import java.util.*
 
-object BuildPlugin : RoosterPlugin("BuildPlugin") {
-    lateinit var playerManager: PlayerManager
-    lateinit var playerAttributeManager: PlayerAttributeManager
-    lateinit var locationManager: LocationManager
+class BuildPlugin : RoosterPlugin("BuildPlugin") {
+    companion object {
+        lateinit var playerManager: PlayerManager
+        lateinit var playerAttributeManager: PlayerAttributeManager
+        lateinit var locationManager: LocationManager
+    }
 
     override fun beforeInitialize() {
         playerManager = PlayerManager()
@@ -24,9 +26,11 @@ object BuildPlugin : RoosterPlugin("BuildPlugin") {
     }
 
     override fun getLocaleProvider(): LocaleProvider {
-        return SqlLocaleProvider(mapOf(
-            "en_US" to Locale.ENGLISH,
-            "de_DE" to Locale.GERMAN
-        ), "en_US")
+        return SqlLocaleProvider(
+            mapOf(
+                "en_US" to Locale.ENGLISH,
+                "de_DE" to Locale.GERMAN
+            ), "en_US"
+        )
     }
 }

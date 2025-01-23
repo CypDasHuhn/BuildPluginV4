@@ -6,38 +6,43 @@ import de.cypdashuhn.rooster_worldedit.commands.WESelectionArgument
 import org.bukkit.Location
 import org.bukkit.entity.Player
 
-val loadRegionArguments = listOf(
-    WESelectionArgument.regionSelection(),
-    Arguments.location.region()
-).eachOnExecuteWithThisUnfinished { info, arg ->
-    val region = info.arg(arg)
-    load(info, null, region.edge1, region.edge2)
-}
+object LoadCommand : RoosterCommand("!load") {
+    override fun content(arg: UnfinishedArgument): Argument {
+        val command = arg
 
-val locationArgument = (Arguments.location.location().onExecuteWithThis { info, arg ->
-    val loc = info.arg(arg)
-    load(info, null, loc, null)
-})
+        return command.followedBy(buildNameArgument)
+            .followedBy((regionArguments or locationArgument).eachFollowedBy(loadFrameArgument))
+    }
 
-fun load(info: InvokeInfo, frameNum: Int?, pos1: Location, pos2: Location?) {
-    val build = info.arg(buildNameArgument)
-    val player = info.sender as Player
-    if (frameNum != null) BuildManager.load(player, build, frameNum, pos1, pos2)
-    else BuildManager.loadAll(player, build, pos1, pos2)
-}
+    private val regionArguments = listOf(
+        WESelectionArgument.regionSelection(),
+        Arguments.location.region()
+    ).eachOnExecuteWithThisUnfinished { info, arg ->
+        val region = info.arg(arg)
+        load(info, null, region.edge1, region.edge2)
+    }
 
-val loadFrameArgument = frameArgument.onExecute {
-    val loc = it.argNullable(locationArgument)
-    val frame = it.context["frame"] as Double
+    private val locationArgument = (Arguments.location.location().onExecuteWithThis { info, arg ->
+        val loc = info.arg(arg)
+        load(info, null, loc, null)
+    })
 
-    if (loc != null) {
-        load(it, frame.toInt(), loc, null)
-    } else {
-        val region = it.arg(loadRegionArguments)
-        load(it, frame.toInt(), region.edge1, region.edge2)
+    private fun load(info: InvokeInfo, frameNum: Int?, pos1: Location, pos2: Location?) {
+        val build = info.arg(buildNameArgument)
+        val player = info.sender as Player
+        if (frameNum != null) BuildManager.load(player, build, frameNum, pos1, pos2)
+        else BuildManager.loadAll(player, build, pos1, pos2)
+    }
+
+    private val loadFrameArgument = frameArgument.copy().onExecuteWithThisFinished { info, self: TypedArgument<Int> ->
+        val loc = info.argNullable(locationArgument)
+        val frame = info.arg(self)
+
+        if (loc != null) {
+            load(info, frame, loc, null)
+        } else {
+            val region = info.arg(regionArguments)
+            load(info, frame, region.edge1, region.edge2)
+        }
     }
 }
-
-val load: Argument = Arguments.literal.single("load")
-    .followedBy(buildNameArgument)
-    .followedBy((loadRegionArguments or locationArgument).eachFollowedBy(loadFrameArgument))

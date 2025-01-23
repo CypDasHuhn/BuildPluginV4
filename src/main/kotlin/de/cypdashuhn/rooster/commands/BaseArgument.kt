@@ -137,10 +137,6 @@ abstract class BaseArgument(
         ).also { it.internalLastChange = internalLastChange }
     }
 
-    open fun copy(): BaseArgument {
-        return toArgument()
-    }
-
     fun displayPaths(): List<String> {
         val paths = mutableListOf<String>()
 
@@ -215,6 +211,10 @@ abstract class BaseArgument(
 
     fun isValid(isValid: ((ArgumentInfo) -> IsValidResult)?): Argument {
         return appendChange { it.isValid = isValid }.toArgument()
+    }
+
+    fun isEnabled(isEnabled: (ArgumentPredicate)?): Argument {
+        return appendChange { it.isEnabled = isEnabled }.toArgument()
     }
 }
 

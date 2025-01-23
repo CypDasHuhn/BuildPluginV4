@@ -1,5 +1,6 @@
 package de.cypdashuhn.rooster.region
 
+import com.sk89q.worldedit.math.Vector3
 import de.cypdashuhn.rooster.util.Box
 import de.cypdashuhn.rooster.util.toVector3d
 import de.cypdashuhn.rooster.util.value
@@ -51,6 +52,8 @@ class Region(
     val sideSizeY: Int by lazy { sizeX * sizeZ }
     val sideSizeZ: Int by lazy { sizeX * sizeY }
 
+    val dimensions: Vector3d by lazy { Vector3d(sizeX.toDouble(), sizeY.toDouble(), sizeZ.toDouble()) }
+
     val minXChunk: Int by lazy { minX / 16 }
     val minZChunk: Int by lazy { minZ / 16 }
     val maxXChunk: Int by lazy { maxX / 16 }
@@ -58,6 +61,7 @@ class Region(
 
     val vector1: Vector3d by lazy { edge1.toVector3d() }
     val vector2: Vector3d by lazy { edge2.toVector3d() }
+
     val box: Box by lazy { vector1 to vector2 }
 
     fun contains(location: Location): Boolean {

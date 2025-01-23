@@ -24,7 +24,7 @@ object NameArgument {
     fun unique(
         usedNames: List<String>,
         key: String = "name",
-        uniqueErrorKey: String = "rooster.name.used",
+        uniqueErrorKey: String = "rooster.name.reserved_error",
         isValid: ((ArgumentInfo) -> IsValidResult)? = null
     ): UnfinishedArgument {
         return UnfinishedArgument(
@@ -46,7 +46,7 @@ object NameArgument {
         extraQuery: Op<Boolean>? = null,
         isValid: ((ArgumentInfo) -> IsValidResult)? = null,
         key: String = "name",
-        uniqueErrorKey: String = "rooster.name.used",
+        uniqueErrorKey: String = "rooster.name.reserved_error",
         nameArg: String = "name"
     ): UnfinishedArgument {
         return UnfinishedArgument(

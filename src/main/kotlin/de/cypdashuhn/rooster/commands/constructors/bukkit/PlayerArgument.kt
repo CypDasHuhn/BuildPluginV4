@@ -5,13 +5,12 @@ import de.cypdashuhn.rooster.commands.UnfinishedArgument
 import de.cypdashuhn.rooster.commands.constructors.ListArgument
 import de.cypdashuhn.rooster.localization.tSend
 import org.bukkit.Bukkit
-import org.bukkit.World
 import org.bukkit.entity.Player
 
 object PlayerArgument {
     fun single(
         key: String = "player",
-        notMatchingKey: String = "rooster.player.not_matching",
+        notMatchingKey: String = "rooster.player.not_matching_error",
         notMatchingArg: String = "player",
         onMissingKey: String = "rooster.player.missing_error",
     ): UnfinishedArgument {
@@ -23,11 +22,12 @@ object PlayerArgument {
         )
     }
 
-    class PlayerArgumentType(argument: UnfinishedArgument, argKey: String) : SimpleArgumentType<Player>("Player", argument, argKey)
+    class PlayerArgumentType(argument: UnfinishedArgument, argKey: String) :
+        SimpleArgumentType<Player>("Player", argument, argKey)
 
     fun multiple(
         key: String = "player",
-        notMatchingKey: String = "rooster.player.not_matching",
+        notMatchingKey: String = "rooster.player.not_matching_error",
         notMatchingArg: String = "player",
         onMissingKey: String = "rooster.player.missing_error",
     ): UnfinishedArgument {
@@ -39,5 +39,6 @@ object PlayerArgument {
         )
     }
 
-    class PlayerListArgumentType(argument: UnfinishedArgument, argKey: String) : SimpleArgumentType<List<Player>>("PlayerList", argument, argKey)
+    class PlayerListArgumentType(argument: UnfinishedArgument, argKey: String) :
+        SimpleArgumentType<List<Player>>("PlayerList", argument, argKey)
 }

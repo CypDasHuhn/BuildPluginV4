@@ -8,7 +8,7 @@ import org.bukkit.Material
 object MaterialArgument {
     fun single(
         key: String = "material",
-        notMatchingKey: String = "rooster.material.not_matching",
+        notMatchingKey: String = "rooster.material.not_matching_error",
         notMatchingArg: String = "material",
         onMissingKey: String = "rooster.material.missing_error",
         materialFilter: (Material) -> Boolean = { true }
@@ -26,7 +26,7 @@ object MaterialArgument {
 
     fun multiple(
         key: String = "material",
-        notMatchingKey: String = "rooster.material.not_matching",
+        notMatchingKey: String = "rooster.material.not_matching_error",
         notMatchingArg: String = "material",
         onMissingKey: String = "rooster.material.missing_error",
         materialFilter: (Material) -> Boolean = { true }

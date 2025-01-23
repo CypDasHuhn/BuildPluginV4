@@ -1,100 +1,85 @@
 {
-  "\"rooster": {
-    "": "",
-    "interface_missing\"": "",
-    "interface_not_found\"": ""
+  "rooster_worldedit": {
+    "selection": "selection"
   },
-  "RoosterCache": "",
-  "actions": "",
-  "at_least_one": "",
-  "build": "",
-  "build.actions": "",
-  "build.build": "",
-  "build.commands": "",
-  "build.create": "",
-  "build.db": "",
-  "build.frame": "",
-  "build.frameAmount": "",
-  "build.generalDuration": "",
-  "build.id": "",
-  "build.name": "",
-  "build.xLength": "",
-  "build.yLength": "",
-  "build.zLength": "",
-  "build_dimensions_mismatch": "<red>The dimensions are not the same!",
-  "build_register_name_exists": "<red>The build name \"<gold>${name}\" already exists! ",
-  "build_register_name_missing": "<red>You need to provide a name for the build!",
-  "build_register_no_block_selected": "<red>You are not looking at a block!",
-  "build_register_step_1": "<green>You are registering the build \"<gold>${name}<green>\".\nUse \"<purple>build pos1<green>\" to continue.",
-  "commands": "",
-  "core": "",
-  "create": "",
-  "database": "",
-  "db": "",
-  "decimal_error": "",
-  "demo": "",
-  "frame": "",
-  "frameAmount": "",
-  "generalDuration": "",
-  "id": "",
-  "interface_missing": "",
-  "interface_not_found": "",
-  "label": "",
-  "list": "",
-  "listeners": "",
-  "localization": "",
-  "location": "",
-  "material": "",
-  "missing": "",
-  "missing_error": "",
-  "name": "",
-  "name_used": "",
-  "negative_error": "",
-  "new_frame": "",
-  "not_a_number": "",
-  "not_a_number_error": "",
-  "not_found": "",
-  "not_matching": "",
-  "number": "",
-  "placeholder": "",
-  "player": "",
-  "region": "",
-  "rooster": "",
-  "rooster.RoosterCache": "",
-  "rooster.commands": "",
-  "rooster.core": "",
-  "rooster.database": "",
-  "rooster.demo": "",
-  "rooster.interface_missing": "",
-  "rooster.interface_not_found": "",
-  "rooster.list": "",
-  "rooster.listeners": "",
-  "rooster.localization": "",
-  "rooster.location": "",
-  "rooster.material": "",
-  "rooster.name": "",
-  "rooster.number": "",
-  "rooster.player": "",
-  "rooster.region": "",
-  "rooster.simulator": "",
-  "rooster.ui": "",
-  "rooster.util": "",
-  "rooster_name_placeholder": "[name]",
-  "rooster_number_placeholder": "[number]",
-  "rooster_worldedit_selection": "selection",
-  "simulator": "",
-  "success": "",
-  "test": "<bold><gold>Hello!",
-  "ui": "",
-  "used": "",
-  "util": "",
-  "x": "",
-  "xLength": "",
-  "y": {
-    "too_high": "",
-    "too_low": ""
+  "build": {
+    "edit": {
+      "frame_too_high": "<red>The frame number is too high. The maximum is ${frameAmount}."
+    },
+    "build_not_found_error": "<red>The build <yellow>${build} <red>was not found.",
+    "name_missing_error": "<red>The build name is missing.",
+    "frame": {
+      "at_least_one_error": "<red>The frame number must be at least 1.",
+      "placeholder": "[frame]",
+      "missing_error": "<red>The frame number is missing.",
+      "new_frame": "new",
+      "not_matching_error": "<red>The frame number ${frame} is invalid. Specify a frame number between 1 and ${frameAmount}."
+    },
+    "create": {
+      "label": "create",
+      "name_used_error": "<red>The build name <yellow>${name} <red>is already used.",
+      "success": "<green>Build <yellow>${name} <green>was successfully created."
+    }
   },
-  "yLength": "",
-  "zLength": "",
-  "zero_error": ""
+  "rooster": {
+    "interface_not_found_error": "<red>The interface <yellow>${interface} <red>could not be found.",
+    "interface_missing_error": "<red>The interface is missing.",
+    "name": {
+      "placeholder": "[name]",
+      "used_error": "<red>The name <yellow>${name} <red>is already taken.</red>"
+    },
+    "language": {
+      "label": "language",
+      "changed": "<green>Language has been changed to ${language}.",
+      "invalid_error": "<red>The language <yellow>${language} <red>is not supported.</red>",
+      "missing_error": "<red>Language is missing.</red>"
+    },
+    "list": {
+      "not_matching_error": "<red>The entry <yellow>${entry} <red>does not match any of the expected values.</red>",
+      "missing_error": "<red>The entry is missing.</red>"
+    },
+    "number": {
+      "not_a_number_error": "<red>Value is not a valid number.</red>",
+      "negative_error": "<red>Negative values are not allowed.</red>",
+      "zero_error": "<red>Zero is not a valid value.</red>",
+      "decimal_error": "<red>Only whole numbers are allowed.</red>",
+      "placeholder": "[number]",
+      "missing_error": "<red>Number is missing or invalid.</red>"
+    },
+    "player": {
+      "not_matching_error": "<red>The player name <yellow>${player} <red>could not be found.</red>",
+      "missing_error": "<red>Player name is missing.</red>"
+    },
+    "location": {
+      "not_a_number": "<red>Location coordinates must be numeric values.</red>",
+      "decimal_error": "<red>Decimal points are not allowed for coordinates.</red>",
+      "missing": {
+        "x": "<red>X coordinate is missing.</red>",
+        "y": "<red>Y coordinate is missing.</red>",
+        "z": "<red>Z coordinate is missing.</red>"
+      },
+      "y": {
+        "too_low": "<red>The Y coordinate is too low. Minimum is <yellow>-64<red>.",
+        "too_high": "<red>The Y coordinate is too high. Maximum is <yellow>-320<red>"
+      }
+    },
+    "material": {
+      "not_matching_error": "<red>The material does not match the expected type.</red>",
+      "missing_error": "<red>Material is missing or invalid.</red>"
+    },
+    "chat": {
+      "info": "<gray>[Info]</gray> <green>${message}</green>",
+      "confirm": "<green>Confirm your selection by typing 'yes'.</green>",
+      "cancel": "<red>Action has been cancelled.</red>",
+      "already_timeout_error": "<red>The action has already timed out.</red>"
+    },
+    "vector": {
+      "bigger": "<yellow>Bigger</yellow>",
+      "smaller": "<yellow>Smaller</yellow>",
+      "error": "<red>There is a mismatch in your selection.</red>",
+      "error_x": "<red>Your length x should be $<yellow>${distance} <red>${biggerOrSmaller}.</red>",
+      "error_y": "<red>Your height y should be $<yellow>${distance} <red>${biggerOrSmaller}.</red>",
+      "error_z": "<red>Your width z should be $<yellow>${distance} <red>${biggerOrSmaller}.</red>"
+    }
+  }
 }

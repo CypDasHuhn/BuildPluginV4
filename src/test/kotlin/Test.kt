@@ -1,7 +1,7 @@
-import de.cypdashuhn.build.commands.build.BuildCommand
+import de.cypdashuhn.rooster.simulator.RoosterSimulator
 
 fun main() {
-    BuildCommand.command.displayPaths().forEach {
-        println(it)
-    }
+    BuildSimulator.startTerminal()
 }
+
+object BuildSimulator : RoosterSimulator("BuildPlugin")

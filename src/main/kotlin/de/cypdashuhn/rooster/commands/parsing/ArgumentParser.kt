@@ -10,18 +10,19 @@ import de.cypdashuhn.rooster.localization.transformMessage
 import org.bukkit.command.CommandSender
 
 object ArgumentParser {
-    private inline infix fun <reified E> List<E>.contentEqualsOrWithoutLast(other: List<E>): Boolean {
-        val comparisonLength = when (this.size - other.size) {
-            0 -> this.size
-            1 -> other.size
-            else -> return false
+    fun areListsEqual(a: List<String>, b: List<String>): Boolean {
+        if (a.size == b.size) {
+            for (i in 0 until a.size - 1) {
+                if (a[i] != b[i]) return false
+            }
+            return true
+        } else if (a.size + 1 == b.size) {
+            for (i in a.indices) {
+                if (a[i] != b[i]) return false
+            }
+            return true
         }
-
-        for (i in 0 until comparisonLength) {
-            if (this[i] != other[i]) return false
-        }
-
-        return true
+        return false
     }
 
     val defaultErrorArgumentsOverflow: (ArgumentInfo) -> Unit =
@@ -108,7 +109,7 @@ object ArgumentParser {
             val cacheInfo = Rooster.cache.getIfPresent(CACHE_KEY, sender) as CacheInfo?
 
             cacheInfo?.let {
-                if (it.stringArguments contentEqualsOrWithoutLast stringArguments) {
+                if (areListsEqual(it.stringArguments, stringArguments)) {
                     arguments = cacheInfo.arguments
                     headArgument = cacheInfo.headArgument
                     onArgumentOverflow = cacheInfo.errorArgumentOverflow

@@ -47,11 +47,11 @@ object Simulator {
     fun command(input: String): Pair<Boolean, Boolean> {
         values.clear()
 
-        val command = input.split(" ").firstOrNull()
-        val args = input.substring((command?.length ?: -1) + 1)
+        val command = input.split(" ")
+        val args = if (command.size == 1) input else input.substring((command.first().length) + 1)
 
         try {
-            when (command) {
+            when (command.first()) {
                 "exit" -> {
                     println("Exiting the simulator.")
                     return false to true
@@ -79,6 +79,19 @@ object Simulator {
 
                 "click" -> {
                     InterfaceSimulatorHandler.parseClick(args)
+                }
+
+                "help" -> {
+                    listOf(
+                        "exit" to "Exit the Simulator",
+                        "exit-preserve" to "Exit the Simulator without deleting the mock directory",
+                        "complete" to "Complete a command",
+                        "invoke" to "Invoke a command",
+                        "open" to "Open an interface",
+                        "show" to "Show an item in an interface",
+                        "click" to "Click an item in an interface",
+                        "help" to "Show this help message"
+                    ).forEach { (command, description) -> println("$command - $description") }
                 }
 
                 else -> println("Unknown command: $input")

@@ -29,7 +29,7 @@ object CreateCommand : RoosterCommand("!create", onStart = { it is Player }) {
                 info.sender.tSend("build.create.success", "name" to name)
 
                 BuildManager.create(info.sender as Player, name, region)
-            })
+            })I
             .onMissing(playerMessage("build_register_name_missing"))
         return command
     }

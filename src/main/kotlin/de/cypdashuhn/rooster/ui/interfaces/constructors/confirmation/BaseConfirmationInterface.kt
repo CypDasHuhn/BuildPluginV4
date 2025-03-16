@@ -2,7 +2,7 @@ package de.cypdashuhn.rooster.ui.interfaces.constructors.confirmation
 
 import de.cypdashuhn.rooster.ui.interfaces.ClickInfo
 import de.cypdashuhn.rooster.ui.interfaces.Context
-import de.cypdashuhn.rooster.ui.interfaces.Interface
+import de.cypdashuhn.rooster.ui.interfaces.RoosterInterface
 import de.cypdashuhn.rooster.ui.items.InterfaceItem
 import de.cypdashuhn.rooster.ui.items.Slots
 import org.bukkit.Material
@@ -17,7 +17,7 @@ abstract class BaseConfirmationInterface<T : Context>(
     override val contextClass: KClass<T>,
     open val onConfirm: (ClickInfo<T>) -> Unit,
     open val onCancel: (CancelInfo<T>) -> Unit
-) : Interface<T>(interfaceName, contextClass) {
+) : RoosterInterface<T>(interfaceName, contextClass) {
     private fun confirmationItem() = InterfaceItem(
         slots = Slots(8),
         itemStackCreator = { ItemStack(Material.GREEN_STAINED_GLASS_PANE) },

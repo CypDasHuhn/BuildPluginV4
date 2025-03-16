@@ -5,7 +5,7 @@ import com.google.gson.GsonBuilder
 import de.cypdashuhn.rooster.core.Rooster
 import de.cypdashuhn.rooster.database.findEntry
 import de.cypdashuhn.rooster.ui.interfaces.Context
-import de.cypdashuhn.rooster.ui.interfaces.Interface
+import de.cypdashuhn.rooster.ui.interfaces.RoosterInterface
 import de.cypdashuhn.rooster.util.uuid
 import org.bukkit.entity.Player
 import org.jetbrains.exposed.dao.IntEntity
@@ -36,7 +36,7 @@ class SqlInterfaceContextProvider : InterfaceContextProvider() {
         val content by InterfaceContexts.content
     }
 
-    override fun <T : Context> updateContext(player: Player, interfaceInstance: Interface<T>, context: T) {
+    override fun <T : Context> updateContext(player: Player, interfaceInstance: RoosterInterface<T>, context: T) {
         val jsonContent = Gson().toJson(context)
         transaction {
             val existingContext = InterfaceContexts.selectAll()
@@ -57,7 +57,7 @@ class SqlInterfaceContextProvider : InterfaceContextProvider() {
         }
     }
 
-    override fun <T : Context> getContext(player: Player, interfaceInstance: Interface<T>): T? {
+    override fun <T : Context> getContext(player: Player, interfaceInstance: RoosterInterface<T>): T? {
         val data = InterfaceContext.findEntry(
             (InterfaceContexts.playerUUID eq player.uuid()) and
                     (InterfaceContexts.interfaceName eq interfaceInstance.interfaceName)

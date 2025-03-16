@@ -13,7 +13,6 @@ open class UnfinishedArgument : BaseArgument {
         onMissingChild: ((ArgumentInfo) -> Unit)? = null,
         transformValue: ((ArgumentInfo) -> Any) = { it.arg },
         isOptional: Boolean = false,
-        onArgumentOverflow: ((ArgumentInfo) -> Unit)? = null,
     ) : super(
         key = key,
         isEnabled = isEnabled,
@@ -26,7 +25,6 @@ open class UnfinishedArgument : BaseArgument {
         onMissingChild = onMissingChild,
         transformValue = transformValue,
         isOptional = isOptional,
-        onArgumentOverflow = onArgumentOverflow,
     )
 
     private constructor(

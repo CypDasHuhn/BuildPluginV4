@@ -5,10 +5,6 @@ import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
 
-@Retention(AnnotationRetention.RUNTIME)
-@Target(AnnotationTarget.CLASS)
-annotation class RoosterInterface
-
 typealias Slot = Int
 
 data class InterfaceInfo<T : Context>(
@@ -21,7 +17,7 @@ data class ClickInfo<T : Context>(
     val click: Click,
     val context: T,
     val event: InventoryClickEvent,
-    val clickedInterface: Interface<T>
+    val clickedInterface: RoosterInterface<T>
 )
 
 data class Click(

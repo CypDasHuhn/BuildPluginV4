@@ -110,7 +110,6 @@ object ListArgument {
         errorMissingMessageKey: String = "rooster.list.missing_error",
         isArgument: ArgumentPredicate = { true },
         isValidCompleter: ArgumentPredicate? = null,
-        errorArgumentOverflow: ((ArgumentInfo) -> Unit)? = null,
         transformValue: ((E) -> E) = { it },
     ): DbArgumentType<E> {
         val arg = UnfinishedArgument(
@@ -139,7 +138,6 @@ object ListArgument {
                     arg
                 }
             },
-            onArgumentOverflow = errorArgumentOverflow,
             isValid = { (sender, args, arg, index, values) ->
                 transaction {
                     val condition = if (ignoreCase) displayField.lowerCase() eq arg.lowercase() else displayField eq arg

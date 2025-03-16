@@ -1,6 +1,6 @@
 package de.cypdashuhn.build.db
 
-import de.cypdashuhn.rooster.database.RoosterTable
+import de.cypdashuhn.rooster.database.utility_tables.UtilityDatabase
 import org.jetbrains.exposed.dao.Entity
 import org.jetbrains.exposed.dao.EntityClass
 import org.jetbrains.exposed.dao.id.EntityID
@@ -9,8 +9,7 @@ import org.jetbrains.exposed.sql.ReferenceOption
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
 
-object FrameManager {
-    @RoosterTable
+object FrameManager : UtilityDatabase(Frames) {
     object Frames : IntIdTable() { // Use String as the primary key type
         val build = reference("buildName", DbBuildsManager.Builds, onDelete = ReferenceOption.CASCADE)
         val frameNum = integer("frameNum")
@@ -45,7 +44,7 @@ object FrameManager {
             val build = DbBuildsManager.buildByName(buildName) ?: throw IllegalStateException("Build should exist")
 
             build.frameAmount += 1
-            
+
             Frame.new {
                 this.build = build
                 this.frameNum = frameNumber

@@ -12,7 +12,7 @@ abstract class IndexedContentInterface<ContextType : Context, IdType : Any, Data
     override val interfaceName: String,
     override val contextClass: KClass<ContextType>,
     open val contentArea: Pair<Pair<Int, Int>, Pair<Int, Int>>,
-) : Interface<ContextType>(interfaceName, contextClass) {
+) : RoosterInterface<ContextType>(interfaceName, contextClass) {
 
     val contentAreaStartX by lazy { contentArea.first.first }
     val contentAreaStartY by lazy { contentArea.first.second }

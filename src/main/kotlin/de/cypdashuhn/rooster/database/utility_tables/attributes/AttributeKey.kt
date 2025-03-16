@@ -1,4 +1,4 @@
-package database.utility_tables.attributes
+package de.cypdashuhn.rooster.database.utility_tables.attributes
 
 import de.cypdashuhn.rooster.database.utility_tables.UtilityDatabase
 import org.jetbrains.exposed.dao.IntEntity

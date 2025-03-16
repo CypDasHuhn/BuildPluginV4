@@ -6,6 +6,10 @@ import org.bukkit.entity.Player
 import org.bukkit.plugin.java.JavaPlugin
 
 abstract class RoosterSimulator(val pluginName: String = "demo") : RoosterShell {
+    init {
+        Rooster.initServices()
+    }
+
     fun startTerminal() {
         Simulator.initializeSimulator(this)
 
@@ -23,7 +27,7 @@ abstract class RoosterSimulator(val pluginName: String = "demo") : RoosterShell 
         super.initializeRooster(plugin, pluginName)
         val directoryPath = Rooster.plugin.dataFolder.absolutePath
         val clickablePath =
-            "file:///$directoryPath".replace("\\", "/") // Ensure the format is proper for clickable URLs
+            "file:///$directoryPath".replace("\\", "/")
         println("Current Mock Directory: $clickablePath")
     }
 

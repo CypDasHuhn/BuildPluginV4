@@ -21,7 +21,3 @@ fun initDatabase(tables: List<Table>, databasePath: String) {
 fun <T : IntEntity> IntEntityClass<T>.findEntry(query: Op<Boolean>): T? {
     return transaction { this@findEntry.find(query).firstOrNull() }
 }
-
-@Retention(AnnotationRetention.RUNTIME)
-@Target(AnnotationTarget.CLASS)
-annotation class RoosterTable

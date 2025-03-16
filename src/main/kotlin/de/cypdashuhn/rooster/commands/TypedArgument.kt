@@ -16,7 +16,6 @@ abstract class TypedArgument<T>(
     onMissingChild = argument.onMissingChild,
     transformValue = argument.transformValue,
     isOptional = argument.isOptional,
-    onArgumentOverflow = argument.onArgumentOverflow,
 ) {
     abstract fun value(sender: CommandSender, context: CommandContext): TypeResult<T>
 

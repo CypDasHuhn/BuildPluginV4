@@ -13,7 +13,6 @@ object LiteralArgument {
         onMissing: ((ArgumentInfo) -> Unit)? = null,
         onMissingChild: ((ArgumentInfo) -> Unit)? = null,
         transformValue: ((ArgumentInfo) -> Any) = { it.arg },
-        onArgumentOverflow: ((ArgumentInfo) -> Unit)? = null,
         key: String = name,
     ): LiteralArgumentType {
         val arg = UnfinishedArgument(
@@ -23,7 +22,6 @@ object LiteralArgument {
             isTarget = isTarget,
             isValid = isValid,
             transformValue = transformValue,
-            onArgumentOverflow = onArgumentOverflow,
             onMissing = onMissing,
             onMissingChild = onMissingChild,
             isOptional = false
@@ -41,7 +39,6 @@ object LiteralArgument {
         onMissing: ((ArgumentInfo) -> Unit)? = null,
         onMissingChild: ((ArgumentInfo) -> Unit)? = null,
         transformValue: ((ArgumentInfo) -> Any) = { it.arg },
-        onArgumentOverflow: ((ArgumentInfo) -> Unit)? = null,
     ): LiteralArgumentType {
         val arg = UnfinishedArgument(
             key = key,
@@ -50,7 +47,6 @@ object LiteralArgument {
             isTarget = isTarget,
             isValid = isValid,
             transformValue = transformValue,
-            onArgumentOverflow = onArgumentOverflow,
             onMissing = onMissing,
             onMissingChild = onMissingChild,
             isOptional = false

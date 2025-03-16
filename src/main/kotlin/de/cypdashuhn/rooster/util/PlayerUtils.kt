@@ -26,3 +26,8 @@ fun CommandSender.location(): Location? {
         else -> null
     }
 }
+
+fun CommandSender.isPlayer() = this is Player
+fun CommandSender.isCommandBlock() = this is BlockCommandSender
+fun CommandSender.isMinecart() = this is CommandMinecart
+fun CommandSender.isConsole() = this is ConsoleCommandSender

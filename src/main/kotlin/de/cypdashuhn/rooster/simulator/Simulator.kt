@@ -2,10 +2,12 @@ package de.cypdashuhn.rooster.simulator
 
 import be.seeseemelk.mockbukkit.MockBukkit
 import de.cypdashuhn.rooster.core.Rooster
+import de.cypdashuhn.rooster.core.RoosterServices
+import de.cypdashuhn.rooster.database.utility_tables.PlayerManager
 import de.cypdashuhn.rooster.simulator.commands.CommandSimulatorHandler
 import de.cypdashuhn.rooster.simulator.interfaces.InterfaceSimulatorHandler
 import de.cypdashuhn.rooster.ui.interfaces.Context
-import de.cypdashuhn.rooster.ui.interfaces.Interface
+import de.cypdashuhn.rooster.ui.interfaces.RoosterInterface
 import net.kyori.adventure.text.Component
 import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerJoinEvent
@@ -14,7 +16,7 @@ import org.bukkit.inventory.Inventory
 object Simulator {
     var currentInventory: Inventory? = null
     var currentContext: Context? = null
-    var currentInterface: Interface<Context>? = null
+    var currentInterface: RoosterInterface<Context>? = null
     var player: Player? = null
 
     fun initializeSimulator(roosterSimulator: RoosterSimulator): Player {
@@ -32,13 +34,15 @@ object Simulator {
 
         roosterSimulator.onInitialize()
 
-
         val player = server.addPlayer()
 
         val event = PlayerJoinEvent(player, Component.empty())
-        roosterSimulator.beforePlayerJoin(event)
-        Rooster.playerManager?.playerLogin(player)
-        roosterSimulator.onPlayerJoin(event)
+
+        RoosterServices.getIfPresent<PlayerManager>()?.let {
+            it.beforePlayerJoin(event)
+            it.playerLogin(event.player)
+            it.onPlayerJoin(event)
+        }
 
         this.player = player
         return player
@@ -47,11 +51,11 @@ object Simulator {
     fun command(input: String): Pair<Boolean, Boolean> {
         values.clear()
 
-        val command = input.split(" ")
-        val args = if (command.size == 1) input else input.substring((command.first().length) + 1)
+        val command = input.split(" ").firstOrNull()
+        val args = input.substring((command?.length ?: -1) + 1)
 
         try {
-            when (command.first()) {
+            when (command) {
                 "exit" -> {
                     println("Exiting the simulator.")
                     return false to true
@@ -79,19 +83,6 @@ object Simulator {
 
                 "click" -> {
                     InterfaceSimulatorHandler.parseClick(args)
-                }
-
-                "help" -> {
-                    listOf(
-                        "exit" to "Exit the Simulator",
-                        "exit-preserve" to "Exit the Simulator without deleting the mock directory",
-                        "complete" to "Complete a command",
-                        "invoke" to "Invoke a command",
-                        "open" to "Open an interface",
-                        "show" to "Show an item in an interface",
-                        "click" to "Click an item in an interface",
-                        "help" to "Show this help message"
-                    ).forEach { (command, description) -> println("$command - $description") }
                 }
 
                 else -> println("Unknown command: $input")

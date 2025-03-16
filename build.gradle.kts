@@ -1,8 +1,9 @@
 plugins {
     id("xyz.jpenilla.run-paper") version "2.3.1"
-    kotlin("jvm") version "2.0.20"
+    kotlin("jvm") version "2.1.0"
     id("com.github.johnrengelman.shadow") version "8.1.1"
     id("net.minecrell.plugin-yml.bukkit") version "0.6.0"
+    id("com.google.devtools.ksp") version "2.1.0-1.0.29"
 }
 
 group = "de.CypDasHuhn"
@@ -20,7 +21,10 @@ repositories {
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.20-R0.1-SNAPSHOT")
+    implementation(project(":ksp-processor"))
+    ksp(project(":ksp-processor"))
+
+    compileOnly("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     //bukkitLibrary("com.github.CypDasHuhn:Rooster:2fd1a0fa65")
 
@@ -55,14 +59,10 @@ dependencies {
 }
 
 val targetJavaVersion = 21
-kotlin {
-    jvmToolchain(targetJavaVersion)
-}
-
 bukkit {
     name = "BuildPlugin"
     main = "de.cypdashuhn.build.BuildPlugin"
-    apiVersion = "1.21.3"
+    apiVersion = "1.21.4"
 
     commands {
         register("!create")
@@ -80,10 +80,7 @@ bukkit {
 }
 tasks {
     runServer {
-        // Configure the Minecraft version for our task.
-        // This is the only required configuration besides applying the plugin.
-        // Your plugin's jar (or shadowJar if present) will be used automatically.
-        minecraftVersion("1.21.3")
+        minecraftVersion("1.21.4")
     }
     shadowJar {
         mergeServiceFiles()

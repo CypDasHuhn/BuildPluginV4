@@ -13,14 +13,13 @@ import org.bukkit.plugin.java.JavaPlugin
  *
  * TODO: Add Doc Link
  */
-abstract class RoosterPlugin(private val pluginName: String, scanTarget: String? = null) : JavaPlugin(), RoosterShell {
+abstract class RoosterPlugin(private val pluginName: String) : JavaPlugin(), RoosterShell {
+    init {
+        Rooster.initServices()
+    }
+
     final override fun onEnable() {
-        val start = System.currentTimeMillis()
-
         initializeRooster(this, pluginName)
-
-        val duration = System.currentTimeMillis() - start
-        Rooster.roosterLogger.info("Plugin $pluginName took ${duration}ms to initialize")
     }
 
     final override fun initializeRooster(plugin: JavaPlugin, pluginName: String) =

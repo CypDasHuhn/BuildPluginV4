@@ -100,7 +100,6 @@ abstract class BaseArgument(
                 onMissing = onMissing,
                 onMissingChild = onMissingChild,
                 transformValue = transformValue,
-                onArgumentOverflow = onArgumentOverflow,
             ).also { it.internalLastChange = internalLastChange }
         } else {
             Argument(
@@ -114,7 +113,6 @@ abstract class BaseArgument(
                 onMissing = onMissing,
                 onMissingChild = onMissingChild,
                 transformValue = transformValue,
-                onArgumentOverflow = onArgumentOverflow,
             ).also { it.internalLastChange = internalLastChange }
         }
     }
@@ -133,7 +131,6 @@ abstract class BaseArgument(
             onMissingChild = onMissingChild,
             transformValue = transformValue,
             isOptional = isOptional,
-            onArgumentOverflow = onArgumentOverflow,
         ).also { it.internalLastChange = internalLastChange }
     }
 
@@ -215,6 +212,19 @@ abstract class BaseArgument(
 
     fun isEnabled(isEnabled: (ArgumentPredicate)?): Argument {
         return appendChange { it.isEnabled = isEnabled }.toArgument()
+    }
+
+    fun byKey(key: String): List<BaseArgument> {
+        fun arg(arg: BaseArgument): List<BaseArgument> {
+            val s = if (this.key == key) listOf(this) else listOf()
+            val c = (this.followedBy?.map { arg(it) } ?: listOf()).flatten()
+            return s + c
+        }
+        return arg(this)
+    }
+
+    fun byKey(key: String, s: () -> BaseArgument) {
+        
     }
 }
 

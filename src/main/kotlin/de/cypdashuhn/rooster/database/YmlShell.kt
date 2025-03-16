@@ -19,12 +19,14 @@ interface YmlOperations {
     }
 
     companion object {
-        /** * Finds a file in the plugin folder.
-         * Note, use `.exists()` to check
-         * whether that directory is filled. */
+        /**
+         * Finds a file in the plugin folder. Note, use `.exists()` to check
+         * whether that directory is filled.
+         */
         fun findFile(fileName: String, directory: String = "", baseDirectory: String = Rooster.pluginFolder): File {
             return File(baseDirectory, if (directory.isNotEmpty()) "$directory/$fileName" else fileName)
         }
+
 
         fun delete(target: File): Boolean {
             if (target.isDirectory) {

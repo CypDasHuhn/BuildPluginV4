@@ -1,9 +1,6 @@
 package de.cypdashuhn.rooster.listeners.chat
 
-import de.cypdashuhn.rooster.localization.language
-import de.cypdashuhn.rooster.localization.minimessage
-import de.cypdashuhn.rooster.localization.t
-import de.cypdashuhn.rooster.localization.tSend
+import de.cypdashuhn.rooster.localization.*
 import io.papermc.paper.event.player.AsyncChatEvent
 import kotlinx.coroutines.*
 import net.kyori.adventure.text.Component
@@ -78,12 +75,12 @@ object ChatManager {
         }
 
         this.tSend(infoMessage)
-        val confirm = minimessage(t(confirmText, this.language())).asComponent().clickEvent(ClickEvent.callback {
+        val confirm = minimessage(tString(confirmText)).asComponent().clickEvent(ClickEvent.callback {
             if (!timeoutJob.isCancelled) onConfirm(this@clickConfirmation)
             else this@clickConfirmation.tSend(alreadyTimeoutText)
         })
 
-        val cancel = minimessage(t(cancelText, this.language())).asComponent().clickEvent(ClickEvent.callback {
+        val cancel = minimessage(tString(cancelText)).asComponent().clickEvent(ClickEvent.callback {
             if (!timeoutJob.isCancelled) onCancel(this@clickConfirmation)
             else this@clickConfirmation.tSend(alreadyTimeoutText)
         })

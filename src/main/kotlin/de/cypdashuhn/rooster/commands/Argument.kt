@@ -12,7 +12,6 @@ class Argument : BaseArgument {
         onMissing: ((ArgumentInfo) -> Unit)? = null,
         onMissingChild: ((ArgumentInfo) -> Unit)? = null,
         transformValue: ((ArgumentInfo) -> Any) = { it.arg },
-        onArgumentOverflow: ((ArgumentInfo) -> Unit)? = null,
         toBeDeleted: Boolean = false
     ) : super(
         key = key,
@@ -26,7 +25,6 @@ class Argument : BaseArgument {
         onMissingChild = onMissingChild,
         transformValue = transformValue,
         isOptional = false,
-        onArgumentOverflow = onArgumentOverflow,
     )
 
     constructor(
@@ -40,7 +38,6 @@ class Argument : BaseArgument {
         onMissing: ((ArgumentInfo) -> Unit)? = null,
         onMissingChild: ((ArgumentInfo) -> Unit)? = null,
         transformValue: ((ArgumentInfo) -> Any) = { it.arg },
-        onArgumentOverflow: ((ArgumentInfo) -> Unit)? = null,
     ) : super(
         key = key,
         isEnabled = isEnabled,
@@ -53,7 +50,6 @@ class Argument : BaseArgument {
         onMissingChild = onMissingChild,
         transformValue = transformValue,
         isOptional = false,
-        onArgumentOverflow = onArgumentOverflow,
     )
 
     private constructor(

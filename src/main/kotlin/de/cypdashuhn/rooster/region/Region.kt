@@ -1,6 +1,5 @@
 package de.cypdashuhn.rooster.region
 
-import com.sk89q.worldedit.math.Vector3
 import de.cypdashuhn.rooster.util.Box
 import de.cypdashuhn.rooster.util.toVector3d
 import de.cypdashuhn.rooster.util.value

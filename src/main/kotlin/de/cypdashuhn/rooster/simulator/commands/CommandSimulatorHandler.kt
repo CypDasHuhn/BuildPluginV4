@@ -45,7 +45,7 @@ object CommandSimulatorHandler {
     fun command(command: String, type: ArgumentParser.CommandParseType): ArgumentParser.ReturnResult {
         val (label, args) = commandTokenized(command)
 
-        if (!Rooster.registeredRootArguments.any { it.labels.any { it.lowercase() == label.lowercase() } }) {
+        if (!Rooster.registeredCommands.any { it.labels.any { it.lowercase() == label.lowercase() } }) {
             println("Unknown command: $command")
             return ArgumentParser.ReturnResult()
         }

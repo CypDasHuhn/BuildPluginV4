@@ -39,7 +39,7 @@ open class ContextModifierItem<T : Context> : InterfaceItem<T> {
         itemStackCreator: (InterfaceInfo<T>) -> ItemStack,
         contextModifier: (ClickInfo<T>) -> T,
         furtherAction: (ClickInfo<T>) -> Unit = { },
-        priority: (InterfaceInfo<T>) -> Int = { 0 }
+        priority: ((InterfaceInfo<T>) -> Int)? = null
     ) : super(conditionMap, itemStackCreator, contextModifierAction(contextModifier, furtherAction), priority)
 
     constructor(
@@ -47,16 +47,26 @@ open class ContextModifierItem<T : Context> : InterfaceItem<T> {
         itemStackCreator: (InterfaceInfo<T>) -> ItemStack,
         contextModifier: (ClickInfo<T>) -> T,
         furtherAction: (ClickInfo<T>) -> Unit = { },
-        priority: (InterfaceInfo<T>) -> Int = { 0 }
-    ) : super(condition, itemStackCreator, contextModifierAction(contextModifier, furtherAction), priority)
+        priority: ((InterfaceInfo<T>) -> Int)? = null
+    ) : super(
+        condition = condition,
+        itemStackCreator = itemStackCreator,
+        action = contextModifierAction(contextModifier, furtherAction),
+        priority = priority
+    )
 
     constructor(
         condition: (InterfaceInfo<T>) -> Boolean,
         itemStack: ItemStack,
         contextModifier: (ClickInfo<T>) -> T,
         furtherAction: (ClickInfo<T>) -> Unit = { },
-        priority: (InterfaceInfo<T>) -> Int = { 0 }
-    ) : super(condition, itemStack, contextModifierAction(contextModifier, furtherAction), priority)
+        priority: ((InterfaceInfo<T>) -> Int)? = null
+    ) : super(
+        condition = condition,
+        itemStack = itemStack,
+        action = contextModifierAction(contextModifier, furtherAction),
+        priority = priority
+    )
 
     constructor(
         slots: Slots,
@@ -64,8 +74,14 @@ open class ContextModifierItem<T : Context> : InterfaceItem<T> {
         itemStackCreator: (InterfaceInfo<T>) -> ItemStack,
         contextModifier: (ClickInfo<T>) -> T,
         furtherAction: (ClickInfo<T>) -> Unit = { },
-        priority: (InterfaceInfo<T>) -> Int = { 0 }
-    ) : super(slots, condition, itemStackCreator, contextModifierAction(contextModifier, furtherAction), priority)
+        priority: ((InterfaceInfo<T>) -> Int)? = null
+    ) : super(
+        slots = slots,
+        condition = condition,
+        itemStackCreator = itemStackCreator,
+        action = contextModifierAction(contextModifier, furtherAction),
+        priority = priority
+    )
 
     constructor(
         slots: Slots,
@@ -73,6 +89,12 @@ open class ContextModifierItem<T : Context> : InterfaceItem<T> {
         itemStack: ItemStack,
         contextModifier: (ClickInfo<T>) -> T,
         furtherAction: (ClickInfo<T>) -> Unit = { },
-        priority: (InterfaceInfo<T>) -> Int = { 0 }
-    ) : super(slots, condition, itemStack, contextModifierAction(contextModifier, furtherAction), priority)
+        priority: ((InterfaceInfo<T>) -> Int)? = null
+    ) : super(
+        slots = slots,
+        condition = condition,
+        itemStack = itemStack,
+        action = contextModifierAction(contextModifier, furtherAction),
+        priority = priority
+    )
 }

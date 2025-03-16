@@ -1,6 +1,7 @@
 package de.cypdashuhn.rooster.database.utility_tables
 
 import de.cypdashuhn.rooster.core.Rooster
+import de.cypdashuhn.rooster.core.RoosterService
 import org.bukkit.Location
 import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass
@@ -12,8 +13,9 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.castTo
 import org.jetbrains.exposed.sql.transactions.transaction
+import kotlin.reflect.KClass
 
-class LocationManager : UtilityDatabase(Locations) {
+class LocationManager : UtilityDatabase(Locations), RoosterService {
     object Locations : IntIdTable("RoosterLocations") {
         val key = varchar("key", 36).nullable()
 
@@ -55,15 +57,15 @@ class LocationManager : UtilityDatabase(Locations) {
         ignoreKeyLocations: Boolean = false,
         roundCoordinates: Boolean = false,
         ignoreAngle: Boolean = false
-    ): Location {
+    ): org.bukkit.Location {
         return transaction {
             var query: Op<Boolean>
-            query = if (roundCoordinates) {
-                (Locations.x.castTo<Int>(IntegerColumnType()) eq location.x.toInt()) and
+            if (roundCoordinates) {
+                query = (Locations.x.castTo<Int>(IntegerColumnType()) eq location.x.toInt()) and
                         (Locations.y.castTo<Int>(IntegerColumnType()) eq location.y.toInt()) and
                         (Locations.z.castTo<Int>(IntegerColumnType()) eq location.z.toInt())
             } else {
-                (Locations.x eq location.x) and
+                query = (Locations.x eq location.x) and
                         (Locations.y eq location.y) and
                         (Locations.z eq location.z)
             }
@@ -76,7 +78,7 @@ class LocationManager : UtilityDatabase(Locations) {
             if (!ignoreKeyLocations && key != null) query = query and (Locations.key eq key)
             val foundLocation = Location.find { query }.firstOrNull()
 
-            if (foundLocation != null) return@transaction foundLocation
+            if (foundLocation != null) return@transaction foundLocation.location()
 
             val dbLocation = Location.new {
                 this.key = key
@@ -89,7 +91,7 @@ class LocationManager : UtilityDatabase(Locations) {
                 this.pitch = location.pitch
             }
 
-            dbLocation
+            dbLocation.location()
         }
     }
 
@@ -99,9 +101,7 @@ class LocationManager : UtilityDatabase(Locations) {
         }
     }
 
-    fun locationById(id: Int): org.bukkit.Location? {
-        return transaction {
-            Location.find { Locations.id eq id }.firstOrNull()?.location()
-        }
+    override fun targetClass(): KClass<out RoosterService> {
+        return LocationManager::class
     }
 }

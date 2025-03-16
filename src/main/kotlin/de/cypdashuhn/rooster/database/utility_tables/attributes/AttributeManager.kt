@@ -1,4 +1,4 @@
-package database.utility_tables.attributes
+package de.cypdashuhn.rooster.database.utility_tables.attributes
 
 import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException

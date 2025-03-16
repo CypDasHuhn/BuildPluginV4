@@ -3,8 +3,8 @@ package de.cypdashuhn.rooster.simulator.interfaces
 import de.cypdashuhn.rooster.simulator.Simulator
 import de.cypdashuhn.rooster.ui.interfaces.Click
 import de.cypdashuhn.rooster.ui.interfaces.Context
-import de.cypdashuhn.rooster.ui.interfaces.Interface
 import de.cypdashuhn.rooster.ui.interfaces.InterfaceManager
+import de.cypdashuhn.rooster.ui.interfaces.RoosterInterface
 import org.bukkit.event.inventory.ClickType
 import org.bukkit.event.inventory.InventoryAction
 import org.bukkit.event.inventory.InventoryClickEvent
@@ -13,7 +13,7 @@ import org.bukkit.inventory.Inventory
 
 object InterfaceSimulator {
 
-    fun <T : Context> openInterface(targetInterface: Interface<T>, context: T? = null): Inventory {
+    fun <T : Context> openInterface(targetInterface: RoosterInterface<T>, context: T? = null): Inventory {
         requireNotNull(Simulator.player) { "Simulator not initialized" }
         return targetInterface.openInventory(
             Simulator.player!!,

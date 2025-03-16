@@ -1,7 +1,7 @@
 package de.cypdashuhn.rooster.ui.interfaces.constructors
 
 import de.cypdashuhn.rooster.ui.interfaces.Context
-import de.cypdashuhn.rooster.ui.interfaces.Interface
+import de.cypdashuhn.rooster.ui.interfaces.RoosterInterface
 import de.cypdashuhn.rooster.ui.items.InterfaceItem
 import kotlin.reflect.KClass
 
@@ -9,7 +9,7 @@ import kotlin.reflect.KClass
 abstract class FilterInterface<T : FilterInterface.FilterContext>(
     override val interfaceName: String,
     override val contextClass: KClass<T>,
-) : Interface<T>(interfaceName, contextClass) {
+) : RoosterInterface<T>(interfaceName, contextClass) {
     abstract class FilterContext(
         val filter: MutableMap<String, Any?>
     ) : Context()

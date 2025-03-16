@@ -1,25 +1,43 @@
 package de.cypdashuhn.rooster.database.utility_tables
 
-import de.cypdashuhn.rooster.core.Rooster
+import de.cypdashuhn.rooster.core.RoosterService
+import de.cypdashuhn.rooster.core.RoosterServices
 import de.cypdashuhn.rooster.database.utility_tables.PlayerManager.Players.uuid
 import de.cypdashuhn.rooster.util.uuid
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
+import org.bukkit.event.player.PlayerJoinEvent
 import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.transactions.transaction
+import kotlin.reflect.KClass
 
 /**
  * Not Completely Necessary. Use BukkitAPI instead. This manager is if your
  * call frequency exceeds API Limitations, or whatever else you'd like to
  * do.
  */
-class PlayerManager : UtilityDatabase(Players) {
-    init {
-        this.also { Rooster.playerManager = it }
+class PlayerManager private constructor() : UtilityDatabase(Players), RoosterService {
+    internal var beforePlayerJoin: (PlayerJoinEvent) -> Unit = {}
+    internal var onPlayerJoin: (PlayerJoinEvent) -> Unit = {}
+
+    constructor(
+        beforePlayerJoin: (PlayerJoinEvent) -> Unit = {},
+        onPlayerJoin: (PlayerJoinEvent) -> Unit = {}
+    ) : this() {
+        this.beforePlayerJoin = beforePlayerJoin
+        this.onPlayerJoin = onPlayerJoin
+    }
+
+    fun beforePlayerJoin(event: (PlayerJoinEvent) -> Unit) {
+        beforePlayerJoin = event
+    }
+
+    fun onPlayerJoin(event: (PlayerJoinEvent) -> Unit) {
+        onPlayerJoin = event
     }
 
     object Players : IntIdTable("RoosterPlayers") {
@@ -69,8 +87,13 @@ class PlayerManager : UtilityDatabase(Players) {
 
     companion object {
         fun Player.dbPlayer(): DbPlayer {
-            requireNotNull(Rooster.playerManager) { "Player Manager must be registered" }
-            return Rooster.playerManager!!.playerByUUID(this.uuid())!!
+            val playerManager = RoosterServices.getIfPresent<PlayerManager>()
+            requireNotNull(playerManager) { "Player Manager must be registered" }
+            return playerManager.playerByUUID(this.uuid())!!
         }
+    }
+
+    override fun targetClass(): KClass<out RoosterService> {
+        return PlayerManager::class
     }
 }

@@ -1,5 +1,11 @@
 package de.cypdashuhn.rooster.listeners
 
-@Retention(AnnotationRetention.RUNTIME)
-@Target(AnnotationTarget.CLASS)
-annotation class RoosterListener
+import de.cypdashuhn.rooster.core.Rooster
+import de.cypdashuhn.rooster.core.hasRoosterIgnore
+import org.bukkit.event.Listener
+
+open class RoosterListener : Listener {
+    init {
+        if (!hasRoosterIgnore(this)) Rooster.registeredListeners += this
+    }
+}

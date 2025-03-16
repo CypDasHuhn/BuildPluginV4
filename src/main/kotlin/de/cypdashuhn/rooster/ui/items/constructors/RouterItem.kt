@@ -2,8 +2,8 @@ package de.cypdashuhn.rooster.ui.items.constructors
 
 import de.cypdashuhn.rooster.ui.interfaces.ClickInfo
 import de.cypdashuhn.rooster.ui.interfaces.Context
-import de.cypdashuhn.rooster.ui.interfaces.Interface
 import de.cypdashuhn.rooster.ui.interfaces.InterfaceInfo
+import de.cypdashuhn.rooster.ui.interfaces.RoosterInterface
 import de.cypdashuhn.rooster.ui.items.Condition
 import de.cypdashuhn.rooster.ui.items.InterfaceItem
 import de.cypdashuhn.rooster.ui.items.ItemStackCreator
@@ -14,7 +14,7 @@ open class RouterItem<T : Context, K : Context> : InterfaceItem<T> {
         fun <T : Context, K : Context> routerAction(
             furtherAction: (ClickInfo<T>) -> Unit,
             context: ((ClickInfo<T>) -> K?)?,
-            targetInterface: Interface<K>
+            targetInterface: RoosterInterface<K>
         ): (ClickInfo<T>) -> Unit {
             return { clickInfo ->
                 furtherAction(clickInfo)
@@ -29,25 +29,37 @@ open class RouterItem<T : Context, K : Context> : InterfaceItem<T> {
     constructor(
         condition: (InterfaceInfo<T>) -> Boolean,
         itemStackCreator: (InterfaceInfo<T>) -> ItemStack,
-        targetInterface: Interface<K>,
+        targetInterface: RoosterInterface<K>,
         context: ((ClickInfo<T>) -> K?)? = null,
         furtherAction: (ClickInfo<T>) -> Unit = {},
-    ) : super(condition, itemStackCreator, routerAction(furtherAction, context, targetInterface))
+    ) : super(
+        condition = condition,
+        itemStackCreator = itemStackCreator,
+        action = routerAction(furtherAction, context, targetInterface)
+    )
 
     constructor(
         condition: (InterfaceInfo<T>) -> Boolean,
         itemStack: ItemStack,
-        targetInterface: Interface<K>,
+        targetInterface: RoosterInterface<K>,
         context: ((ClickInfo<T>) -> K?)? = null,
         furtherAction: (ClickInfo<T>) -> Unit = {},
-    ) : super(condition, itemStack, routerAction(furtherAction, context, targetInterface))
+    ) : super(
+        condition = condition,
+        itemStack = itemStack,
+        action = routerAction(furtherAction, context, targetInterface)
+    )
 
     constructor(
         condition: Condition<T>,
         itemStack: ItemStackCreator<T>,
-        targetInterface: Interface<K>,
+        targetInterface: RoosterInterface<K>,
         context: ((ClickInfo<T>) -> K?)? = null,
         furtherAction: (ClickInfo<T>) -> Unit = {},
-    ) : super(condition(), itemStack(), routerAction(furtherAction, context, targetInterface))
+    ) : super(
+        condition = condition(),
+        itemStackCreator = itemStack(),
+        action = routerAction(furtherAction, context, targetInterface)
+    )
 }
 

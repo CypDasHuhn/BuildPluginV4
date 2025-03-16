@@ -1,13 +1,11 @@
 package de.cypdashuhn.rooster.listeners
 
 import org.bukkit.event.EventHandler
-import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerInteractEvent
 
 /** Unfinished. Ignore! */
 @Suppress("unused")
-@RoosterListener
-object PlayerInteractListener : Listener {
+object PlayerInteractListener : RoosterListener() {
     @EventHandler
     fun listener(event: PlayerInteractEvent) {
         val usableItems: List<UsableItem> = listOf() // Assuming this will be populated with actual items

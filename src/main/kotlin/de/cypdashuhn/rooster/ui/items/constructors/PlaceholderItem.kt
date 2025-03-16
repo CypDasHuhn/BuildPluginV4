@@ -13,31 +13,35 @@ open class PlaceholderItem<T : Context> : InterfaceItem<T> {
         condition: (InterfaceInfo<T>) -> Boolean,
         itemStack: (InterfaceInfo<T>) -> ItemStack,
         priority: (InterfaceInfo<T>) -> Int = { -1 }
-    ) : super(condition, itemStack, priority = priority)
+    ) : super(condition = condition, itemStackCreator = itemStack, priority = priority)
 
     constructor(
         condition: Condition<T>,
         itemStack: (InterfaceInfo<T>) -> ItemStack,
         priority: (InterfaceInfo<T>) -> Int = { -1 }
-    ) : super(condition(), itemStack, priority = priority)
+    ) : super(condition = condition(), itemStackCreator = itemStack, priority = priority)
 
     constructor(
         condition: Condition<T>,
         itemStack: ItemStackCreator<T>,
         priority: (InterfaceInfo<T>) -> Int = { -1 }
-    ) : super(condition(), itemStack(), priority = priority)
+    ) : super(condition = condition(), itemStackCreator = itemStack(), priority = priority)
 
     constructor(
         condition: (InterfaceInfo<T>) -> Boolean,
         itemStack: ItemStackCreator<T>
-    ) : super(condition, itemStack())
+    ) : super(condition = condition, itemStackCreator = itemStack())
 
     constructor(
         slots: IntRange,
         condition: (InterfaceInfo<T>) -> Boolean = { true },
         itemStack: ItemStack,
         priority: (InterfaceInfo<T>) -> Int = { -1 }
-    ) : super({ it: InterfaceInfo<T> -> it.slot in slots } and condition, { itemStack }, priority = priority)
+    ) : super(
+        condition = { it: InterfaceInfo<T> -> it.slot in slots } and condition,
+        itemStackCreator = { itemStack },
+        priority = priority
+    )
 
     /* Constructors yet needed:
     * slots: IntRange, itemStack: ItemStackCreator<T>

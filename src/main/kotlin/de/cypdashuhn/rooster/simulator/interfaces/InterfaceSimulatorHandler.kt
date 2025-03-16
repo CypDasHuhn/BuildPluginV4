@@ -4,8 +4,8 @@ import de.cypdashuhn.rooster.core.Rooster
 import de.cypdashuhn.rooster.simulator.Simulator
 import de.cypdashuhn.rooster.ui.interfaces.Click
 import de.cypdashuhn.rooster.ui.interfaces.Context
-import de.cypdashuhn.rooster.ui.interfaces.Interface
 import de.cypdashuhn.rooster.ui.interfaces.InterfaceManager
+import de.cypdashuhn.rooster.ui.interfaces.RoosterInterface
 import de.cypdashuhn.rooster.util.createItem
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -47,7 +47,7 @@ object InterfaceSimulatorHandler {
 
         val targetInterface =
             Rooster.registeredInterfaces
-                .firstOrNull { it.interfaceName.equals(interfaceName, ignoreCase = true) } as Interface<Context>?
+                .firstOrNull { it.interfaceName.equals(interfaceName, ignoreCase = true) } as RoosterInterface<Context>?
 
         if (targetInterface == null) {
             println("Unknown interface: $interfaceName")
@@ -63,7 +63,7 @@ object InterfaceSimulatorHandler {
     }
 
     fun openInterface(
-        targetInterface: Interface<Context>,
+        targetInterface: RoosterInterface<Context>,
         contextString: String?,
         player: Player
     ): OpenInterfaceResults {
@@ -215,7 +215,7 @@ object InterfaceSimulatorHandler {
         } else return ClickType.LEFT
     }
 
-    fun contextFromText(contextCommand: String, targetInterface: Interface<Context>): Pair<String, Context?> {
+    fun contextFromText(contextCommand: String, targetInterface: RoosterInterface<Context>): Pair<String, Context?> {
         var contextCommand = contextCommand
         if (contextCommand.startsWith("{") && contextCommand.endsWith("}")) {
             contextCommand = contextCommand.drop(1).dropLast(1).trim()

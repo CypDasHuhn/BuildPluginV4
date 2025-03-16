@@ -24,7 +24,7 @@ object InterfaceManager {
     fun closeInterface(player: Player, event: InventoryCloseEvent) {
         playerInterfaceMap[player] = ""
 
-        val correspondingInterface = currentInterface(player) as Interface<Context>? ?: return
+        val correspondingInterface = currentInterface(player) as RoosterInterface<Context>? ?: return
 
         val context = correspondingInterface.getContext(player)
 
@@ -38,7 +38,7 @@ object InterfaceManager {
      * [targetInterface] for the given [player] applied with the current state
      * of the interface ([context]).
      */
-    fun <T : Context> openTargetInterface(player: Player, targetInterface: Interface<T>, context: T): Inventory {
+    fun <T : Context> openTargetInterface(player: Player, targetInterface: RoosterInterface<T>, context: T): Inventory {
         Rooster.cache.put(CHANGES_INTERFACE_KEY, player, true)
 
         playerInterfaceMap[player] = targetInterface.interfaceName
@@ -72,14 +72,14 @@ object InterfaceManager {
         for (slot in 0 until this.size) {
             interfaceItems
                 .filter { it.totalCondition(InterfaceInfo(slot, context, player)) }
-                .sortedBy { it.priority(InterfaceInfo(slot, context, player)) }
+                .sortedBy { it.priority?.invoke(InterfaceInfo(slot, context, player)) ?: 0 }
                 .forEach { this@fillInventory.setItem(slot, it.itemStackCreator(InterfaceInfo(slot, context, player))) }
         }
         return this
     }
 
     fun <T : Context> getInventory(
-        targetInventory: Interface<T>,
+        targetInventory: RoosterInterface<T>,
         context: T,
         player: Player
     ): Inventory {
@@ -87,7 +87,7 @@ object InterfaceManager {
         val items = targetInventory.getInterfaceItems()
         for (slot in 0 until inventory.size) {
             items.filter { it.totalCondition(InterfaceInfo(slot, context, player)) }
-                .sortedBy { it.priority(InterfaceInfo(slot, context, player)) }
+                .sortedBy { it.priority?.invoke(InterfaceInfo(slot, context, player)) ?: 0 }
                 .forEach {
                     inventory.setItem(slot, it.itemStackCreator(InterfaceInfo(slot, context, player)))
                 }
@@ -95,7 +95,7 @@ object InterfaceManager {
         return inventory
     }
 
-    fun currentInterface(player: Player): Interface<*>? {
+    fun currentInterface(player: Player): RoosterInterface<*>? {
         val interfaceName = playerInterfaceMap[player] ?: return null
         if (interfaceName.isEmpty()) return null
 
@@ -119,17 +119,17 @@ object InterfaceManager {
     fun <T : Context> click(
         click: Click,
         inventoryClickEvent: InventoryClickEvent,
-        targetInterface: Interface<T>,
+        targetInterface: RoosterInterface<T>,
         player: Player
     ) {
         @Suppress("UNCHECKED_CAST")
-        val typedInterface = targetInterface as Interface<Context>
+        val typedInterface = targetInterface as RoosterInterface<Context>
 
         val context = typedInterface.getContext(player)
 
         typedInterface.items
             .filter { it.totalCondition(InterfaceInfo(click.slot, context, click.player)) }
-            .sortedBy { it.priority(InterfaceInfo(click.slot, context, player)) }
+            .sortedBy { it.priority?.invoke(InterfaceInfo(click.slot, context, player)) ?: 0 }
             .forEach { it.action(ClickInfo(click, context, inventoryClickEvent, targetInterface)) }
     }
 }

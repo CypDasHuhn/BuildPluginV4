@@ -8,7 +8,6 @@ interface RoosterService {
 }
 
 object RoosterServices {
-
     private val services: MutableMap<KClass<out RoosterService>, RoosterService> = mutableMapOf()
 
     fun <T : RoosterService> set(instance: T): T {

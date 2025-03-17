@@ -5,8 +5,8 @@ import de.cypdashuhn.rooster.RoosterCache
 import de.cypdashuhn.rooster.commands.RoosterCommand
 import de.cypdashuhn.rooster.commands.parsing.Command
 import de.cypdashuhn.rooster.commands.parsing.Completer
+import de.cypdashuhn.rooster.core.config.RoosterOptions
 import de.cypdashuhn.rooster.database.initDatabase
-import de.cypdashuhn.rooster.demo.DemoManager
 import de.cypdashuhn.rooster.localization.provider.LocaleProvider
 import de.cypdashuhn.rooster.localization.provider.SqlLocaleProvider
 import de.cypdashuhn.rooster.ui.context.InterfaceContextProvider
@@ -15,6 +15,7 @@ import de.cypdashuhn.rooster.ui.interfaces.RoosterInterface
 import org.bukkit.Bukkit
 import org.bukkit.event.Listener
 import org.bukkit.plugin.java.JavaPlugin
+import org.eclipse.sisu.inject.Guice4.lazy
 import org.jetbrains.exposed.sql.Table
 import java.lang.reflect.Method
 import java.util.*
@@ -39,19 +40,22 @@ object Rooster {
         Bukkit.getScheduler().runTask(plugin, Runnable { task() })
     }
 
-    lateinit var pluginName: String
+    lateinit var pluginInfo: PluginInfo
+
+    val services = RoosterServices
+    val options = RoosterOptions
 
     var databasePath: String? = null
     val pluginFolder: String by lazy { plugin.dataFolder.absolutePath }
     val roosterFolder: String by lazy { plugin.dataFolder.parentFile.resolve("Rooster").absolutePath }
 
-    val registeredCommands: MutableList<RoosterCommand> = mutableListOf()
-    val registeredInterfaces: MutableList<RoosterInterface<*>> = mutableListOf()
-    val registeredTables: MutableList<Table> = mutableListOf()
-    val registeredDemoTables: MutableList<Table> = mutableListOf()
-    val registeredDemoManager: MutableList<DemoManager> = mutableListOf()
-    val registeredListeners: MutableList<Listener> = mutableListOf()
-    val registeredFunctions: MutableMap<String, Method> = mutableMapOf()
+    val registered = object {
+        val commands: MutableList<RoosterCommand> = mutableListOf()
+        val interfaces: MutableList<RoosterInterface<*>> = mutableListOf()
+        val tables: MutableList<Table> = mutableListOf()
+        val listeners: MutableList<Listener> = mutableListOf()
+        val functions: MutableMap<String, Method> = mutableMapOf()
+    }
 
     val cache = RoosterCache<String, Any>(
         CacheBuilder.newBuilder().expireAfterWrite(5, TimeUnit.MINUTES)
@@ -69,18 +73,16 @@ object Rooster {
 
     fun initialize(
         plugin: JavaPlugin,
-        pluginName: String,
+        pluginInfo: PluginInfo,
     ) {
         Rooster.plugin = plugin
-        this.pluginName = pluginName
-        if (databasePath == null) databasePath = plugin.dataFolder.resolve("database.db").absolutePath
+        Rooster.pluginInfo = pluginInfo
 
         if (!plugin.dataFolder.exists()) {
             plugin.dataFolder.mkdirs()
         }
 
-        val tables = dynamicTables + registeredTables
-        initDatabase(tables, databasePath!!)
+        initDatabase(registeredTables)
 
         // listeners
         val pluginManager = Bukkit.getPluginManager()

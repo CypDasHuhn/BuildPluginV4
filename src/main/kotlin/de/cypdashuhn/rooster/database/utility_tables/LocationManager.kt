@@ -1,7 +1,9 @@
 package de.cypdashuhn.rooster.database.utility_tables
 
+import com.google.gson.Gson
 import de.cypdashuhn.rooster.core.Rooster
 import de.cypdashuhn.rooster.core.RoosterService
+import de.cypdashuhn.rooster.database.utility_tables.ItemManager.Item.Companion.transform
 import org.bukkit.Location
 import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass
@@ -18,11 +20,16 @@ import kotlin.reflect.KClass
 class LocationManager : UtilityDatabase(Locations), RoosterService {
     object Locations : IntIdTable("RoosterLocations") {
         val key = varchar("key", 36).nullable()
+        private val dataJson = text("data").nullable()
+        val data = dataJson.transform(
+            { data -> Gson().toJson(data) },
+            { json -> Gson().fromJson(json, Any::class.java) }
+        )
 
         val x = double("x")
         val y = double("y")
         val z = double("z")
-        val world_name = varchar("world_name", 36)
+        val worldName = varchar("world_name", 36)
         val yaw = float("yaw")
         val pitch = float("pitch")
     }
@@ -31,17 +38,18 @@ class LocationManager : UtilityDatabase(Locations), RoosterService {
         companion object : IntEntityClass<Location>(Locations)
 
         var key by Locations.key
+        var data by Locations.data.transform()
 
         var x by Locations.x
         var y by Locations.y
         var z by Locations.z
-        var world_name by Locations.world_name
+        var worldName by Locations.worldName
         var yaw by Locations.yaw
         var pitch by Locations.pitch
 
         fun location(): org.bukkit.Location {
             return Location(
-                Rooster.plugin.server.getWorld(world_name),
+                Rooster.plugin.server.getWorld(worldName),
                 x,
                 y,
                 z,
@@ -71,7 +79,8 @@ class LocationManager : UtilityDatabase(Locations), RoosterService {
             }
 
             if (!ignoreAngle) {
-                query = query and (Locations.yaw eq location.yaw) and
+                query = query and
+                        (Locations.yaw eq location.yaw) and
                         (Locations.pitch eq location.pitch)
             }
 
@@ -86,7 +95,7 @@ class LocationManager : UtilityDatabase(Locations), RoosterService {
                 this.x = location.x
                 this.y = location.y
                 this.z = location.z
-                this.world_name = location.world.name
+                this.worldName = location.world.name
                 this.yaw = location.yaw
                 this.pitch = location.pitch
             }

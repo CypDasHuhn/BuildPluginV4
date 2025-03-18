@@ -9,9 +9,8 @@ import org.bukkit.entity.Player
 
 object EditCommand : RoosterCommand("!edit") {
     override fun content(arg: UnfinishedArgument): Argument {
-        val command = arg
-
-        return command.followedBy(buildNameArgument)
+        return arg
+            .followedBy(buildNameArgument)
             .followedBy(editRegionArguments.eachFollowedBy(newFrame))
     }
 

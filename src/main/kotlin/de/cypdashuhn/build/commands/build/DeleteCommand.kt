@@ -9,13 +9,13 @@ import de.cypdashuhn.rooster.localization.tSend
 import org.bukkit.entity.Player
 
 object DeleteCommand : RoosterCommand("!delete", onStart = { it is Player }) {
-    private const val BUILD_NAME_KEY = "name"
     override fun content(arg: UnfinishedArgument): Argument {
-        val command = arg
-            .followedBy(buildNameArgument).onExecute {
-                val build = it.arg(buildNameArgument)
+        return arg
+            .followedBy(buildNameArgument)
+            .onExecute { info ->
+                val build = info.arg(buildNameArgument)
 
-                (it.sender as Player).chatConfirmation(
+                (info.sender as Player).chatConfirmation(
                     onConfirm = {
                         BuildManager.delete(build)
                     },
@@ -24,7 +24,5 @@ object DeleteCommand : RoosterCommand("!delete", onStart = { it is Player }) {
                     }
                 )
             }
-
-        return command
     }
 }

@@ -41,7 +41,6 @@ object NameArgument {
     }
 
     fun unique(
-        table: Table,
         targetColumn: Column<String>,
         extraQuery: Op<Boolean>? = null,
         isValid: ((ArgumentInfo) -> IsValidResult)? = null,
@@ -54,6 +53,7 @@ object NameArgument {
             suggestions = { listOf(t("rooster.name.placeholder")) },
             isValid = {
                 transaction {
+                    val table = targetColumn.table
                     var query = targetColumn eq it.arg
                     extraQuery?.let { query = query and it }
 

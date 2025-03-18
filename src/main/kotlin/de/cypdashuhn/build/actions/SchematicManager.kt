@@ -20,7 +20,7 @@ import java.io.FileOutputStream
 
 
 object SchematicManager {
-    fun dir(buildName: String, frame: Int): File {
+    private fun dir(buildName: String, frame: Int): File {
         return File(Rooster.pluginFolder + "/schematics/$buildName/$frame.schem")
     }
 

@@ -18,7 +18,7 @@ object BuildManager {
     }
 
     fun load(player: Player, build: DbBuildsManager.Build, frame: Int, pos1: Location, pos2: Location?) {
-        SchematicManager.load(build.name, frame, target(player, pos1, pos2))
+        SchematicManager.load(build.name, frame, target(pos1, pos2))
     }
 
     fun loadAll(player: Player, build: DbBuildsManager.Build, pos1: Location, pos2: Location?) {
@@ -52,12 +52,6 @@ object BuildManager {
         })
     }
 
-    private fun target(player: Player, pos1: Location, pos2: Location?): Location {
-        return if (pos2 == null) pos1 else {
-            Region(pos1, pos2).min
-        }
-    }
-
     fun save(player: Player, build: DbBuildsManager.Build, frame: Int, pos1: Location, pos2: Location?) {
         val frames = build.frameAmount
 
@@ -82,5 +76,11 @@ object BuildManager {
 
     fun delete(build: DbBuildsManager.Build) {
         DbBuildsManager.delete(build)
+    }
+
+    private fun target(pos1: Location, pos2: Location?): Location {
+        return if (pos2 == null) pos1 else {
+            Region(pos1, pos2).min
+        }
     }
 }

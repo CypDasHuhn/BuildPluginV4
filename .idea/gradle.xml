@@ -4,13 +4,28 @@
   <component name="GradleSettings">
     <option name="linkedExternalProjectsSettings">
       <GradleProjectSettings>
+        <compositeConfiguration>
+          <compositeBuild compositeDefinitionSource="SCRIPT">
+            <builds>
+              <build path="$PROJECT_DIR$/../Rooster" name="Rooster">
+                <projects>
+                  <project path="$PROJECT_DIR$/../Rooster" />
+                  <project path="$PROJECT_DIR$/../Rooster/rooster-ksp-processor" />
+                  <project path="$PROJECT_DIR$/../Rooster/rooster-worldedit" />
+                </projects>
+              </build>
+            </builds>
+          </compositeBuild>
+        </compositeConfiguration>
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="gradleHome" value="$PROJECT_DIR$/../../../../../Gradle/gradle-8.10" />
         <option name="gradleJvm" value="graalvm-jdk-21" />
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/ksp-processor" />
+            <option value="$PROJECT_DIR$/../Rooster" />
+            <option value="$PROJECT_DIR$/../Rooster/rooster-ksp-processor" />
+            <option value="$PROJECT_DIR$/../Rooster/rooster-worldedit" />
           </set>
         </option>
       </GradleProjectSettings>

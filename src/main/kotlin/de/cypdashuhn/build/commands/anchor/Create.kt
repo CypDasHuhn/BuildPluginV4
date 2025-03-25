@@ -12,7 +12,6 @@ val create = Arguments.literal.single(t("build_anchor_create"))
     .followedBy(
         Arguments.names.unique(
             key = ANCHOR_NAME_KEY,
-            table = LocationManager.Locations,
             targetColumn = LocationManager.Locations.key as Column<String>,
             extraQuery = LocationManager.Locations.key.isNotNull(),
             uniqueErrorKey = "build.create.name_used_error"

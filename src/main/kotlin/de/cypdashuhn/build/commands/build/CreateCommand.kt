@@ -12,7 +12,7 @@ object CreateCommand : RoosterCommand("!create", onStart = { it is Player }) {
         key = "name",
         targetColumn = DbBuildsManager.Builds.name,
         uniqueErrorKey = "build.create.name_used_error",
-    ).onMissing(playerMessage("build_register_name_missing"))
+    )
 
     override fun content(arg: UnfinishedArgument): Argument {
         val command = arg

@@ -3,29 +3,22 @@ package de.cypdashuhn.build.actions
 import de.cypdashuhn.build.db.DbBuildsManager
 import de.cypdashuhn.build.db.FrameManager
 import de.cypdashuhn.rooster.core.Rooster.plugin
-import de.cypdashuhn.rooster.localization.tSend
 import de.cypdashuhn.rooster.region.Region
 import de.cypdashuhn.rooster.region.compareVectors
 import de.cypdashuhn.rooster_worldedit.adapter.toWorldEditRegion
-import de.cypdashuhn.rooster_worldedit.adapter.worldEditSelection
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.entity.Player
 
 object BuildManager {
-    fun create(player: Player, buildName: String) {
-        val region = player.worldEditSelection() ?: run {
-            player.tSend("build_missing_selection")
-            return
-        }
-
-        DbBuildsManager.register(buildName, region.dimensions.toVector3())
+    fun create(player: Player, buildName: String, region: Region) {
+        DbBuildsManager.register(buildName, region.dimensions)
         FrameManager.newFrame(buildName, 1)
-        SchematicManager.save(buildName, 1, region)
+        SchematicManager.save(buildName, 1, region.toWorldEditRegion())
     }
 
     fun load(player: Player, build: DbBuildsManager.Build, frame: Int, pos1: Location, pos2: Location?) {
-        SchematicManager.load(build.name, frame, target(player, pos1, pos2))
+        SchematicManager.load(build.name, frame, target(pos1, pos2))
     }
 
     fun loadAll(player: Player, build: DbBuildsManager.Build, pos1: Location, pos2: Location?) {
@@ -59,12 +52,6 @@ object BuildManager {
         })
     }
 
-    private fun target(player: Player, pos1: Location, pos2: Location?): Location {
-        return if (pos2 == null) pos1 else {
-            Region(pos1, pos2).min
-        }
-    }
-
     fun save(player: Player, build: DbBuildsManager.Build, frame: Int, pos1: Location, pos2: Location?) {
         val frames = build.frameAmount
 
@@ -89,5 +76,11 @@ object BuildManager {
 
     fun delete(build: DbBuildsManager.Build) {
         DbBuildsManager.delete(build)
+    }
+
+    private fun target(pos1: Location, pos2: Location?): Location {
+        return if (pos2 == null) pos1 else {
+            Region(pos1, pos2).min
+        }
     }
 }

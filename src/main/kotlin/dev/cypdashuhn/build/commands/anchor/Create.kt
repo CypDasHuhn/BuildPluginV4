@@ -1,5 +1,5 @@
-package de.cypdashuhn.build.commands.anchor
-
+package dev.cypdashuhn.build.commands.anchor
+/*
 import de.cypdashuhn.rooster.commands.Arguments
 import de.cypdashuhn.rooster.database.utility_tables.LocationManager
 import de.cypdashuhn.rooster.localization.t
@@ -16,4 +16,4 @@ val create = Arguments.literal.single(t("build_anchor_create"))
             extraQuery = LocationManager.Locations.key.isNotNull(),
             uniqueErrorKey = "build.create.name_used_error"
         )
-    )
+    )*/

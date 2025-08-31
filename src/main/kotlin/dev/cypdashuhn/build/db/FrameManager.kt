@@ -1,6 +1,5 @@
-package de.cypdashuhn.build.db
+package dev.cypdashuhn.build.db
 
-import de.cypdashuhn.rooster.database.utility_tables.UtilityDatabase
 import org.jetbrains.exposed.dao.Entity
 import org.jetbrains.exposed.dao.EntityClass
 import org.jetbrains.exposed.dao.id.EntityID
@@ -9,7 +8,7 @@ import org.jetbrains.exposed.sql.ReferenceOption
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
 
-object FrameManager : UtilityDatabase(Frames) {
+object FrameManager {
     object Frames : IntIdTable() { // Use String as the primary key type
         val build = reference("buildName", DbBuildsManager.Builds, onDelete = ReferenceOption.CASCADE)
         val frameNum = integer("frameNum")

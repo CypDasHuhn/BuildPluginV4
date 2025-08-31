@@ -1,11 +1,11 @@
-package de.cypdashuhn.build.actions
+package dev.cypdashuhn.build.actions
 
-import de.cypdashuhn.build.db.DbBuildsManager
-import de.cypdashuhn.build.db.FrameManager
-import de.cypdashuhn.rooster.core.Rooster.plugin
-import de.cypdashuhn.rooster.region.Region
-import de.cypdashuhn.rooster.region.compareVectors
-import de.cypdashuhn.rooster_worldedit.adapter.toWorldEditRegion
+import dev.cypdashuhn.build.BuildPlugin
+import dev.cypdashuhn.build.db.DbBuildsManager
+import dev.cypdashuhn.build.db.FrameManager
+import dev.cypdashuhn.build.worldedit.toWorldEditRegion
+import dev.cypdashuhn.rooster.common.region.Region
+import dev.cypdashuhn.rooster.common.region.compareVectors
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.entity.Player
@@ -17,9 +17,15 @@ object BuildManager {
         SchematicManager.save(buildName, 1, region.toWorldEditRegion())
     }
 
+    fun load(player: Player, build: DbBuildsManager.Build, frame: Int, region: Region) =
+        load(player, build, frame, region.edge1, region.edge2)
+
     fun load(player: Player, build: DbBuildsManager.Build, frame: Int, pos1: Location, pos2: Location?) {
         SchematicManager.load(build.name, frame, target(pos1, pos2))
     }
+
+    fun loadAll(player: Player, build: DbBuildsManager.Build, region: Region) =
+        loadAll(player, build, region.edge1, region.edge2)
 
     fun loadAll(player: Player, build: DbBuildsManager.Build, pos1: Location, pos2: Location?) {
         val frames = build.frameAmount
@@ -34,7 +40,7 @@ object BuildManager {
 
         val corner = if (pos2 == null) pos1 else Region(pos1, pos2).min
 
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, Runnable {
+        Bukkit.getScheduler().runTaskAsynchronously(BuildPlugin.plugin, Runnable {
             (1..frames).forEach { frameNumber ->
                 val duration = generalDuration ?: run {
                     val frame = FrameManager.getFrame(build.name, frameNumber)
@@ -43,7 +49,7 @@ object BuildManager {
                     frame.duration ?: throw IllegalStateException("Frame duration should exist")
                 }
 
-                Bukkit.getScheduler().runTask(plugin, Runnable {
+                Bukkit.getScheduler().runTask(BuildPlugin.plugin, Runnable {
                     load(player, build, frameNumber, corner, null)
                 })
 
@@ -51,6 +57,9 @@ object BuildManager {
             }
         })
     }
+
+    fun save(player: Player, build: DbBuildsManager.Build, frame: Int, region: Region) =
+        save(player, build, frame, region.edge1, region.edge2)
 
     fun save(player: Player, build: DbBuildsManager.Build, frame: Int, pos1: Location, pos2: Location?) {
         val frames = build.frameAmount

@@ -1,4 +1,4 @@
-package de.cypdashuhn.build.commands.anchor
+package dev.cypdashuhn.build.commands.anchor
 
 
 //object AnchorCommand : RoosterCommand("!anchor") {

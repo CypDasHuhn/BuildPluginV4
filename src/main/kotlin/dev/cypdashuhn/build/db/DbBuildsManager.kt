@@ -1,7 +1,6 @@
-package de.cypdashuhn.build.db
+package dev.cypdashuhn.build.db
 
-import de.cypdashuhn.rooster.database.findEntry
-import de.cypdashuhn.rooster.database.utility_tables.UtilityDatabase
+import dev.cypdashuhn.rooster.db.findEntry
 import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
@@ -10,7 +9,7 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.joml.Vector3d
 
-object DbBuildsManager : UtilityDatabase(Builds) {
+object DbBuildsManager {
     object Builds : IntIdTable() {
         val name = varchar("name", 255)
         val frameAmount = integer("frame_amount")
@@ -78,5 +77,9 @@ object DbBuildsManager : UtilityDatabase(Builds) {
         transaction {
             build.delete()
         }
+    }
+
+    fun all(): List<Build> {
+        return Build.all().toList()
     }
 }

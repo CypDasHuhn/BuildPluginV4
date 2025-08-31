@@ -1,11 +1,14 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
 plugins {
     id("xyz.jpenilla.run-paper") version "2.3.1"
-    kotlin("jvm") version "2.1.20"
+    kotlin("jvm") version "2.2.0"
     id("com.github.johnrengelman.shadow") version "8.1.1"
+    id("com.gradleup.shadow") version "8.3.3"
     id("net.minecrell.plugin-yml.bukkit") version "0.6.0"
 }
 
-group = "de.CypDasHuhn"
+group = "dev.CypDasHuhn"
 version = "1.0-SNAPSHOT"
 
 repositories {
@@ -17,12 +20,12 @@ repositories {
         name = "sonatype"
     }
     maven { url = uri("https://maven.enginehub.org/repo/") }
+    maven("https://repo.codemc.org/repository/maven-public/")
 }
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.20-R0.1-SNAPSHOT")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-    //bukkitLibrary("com.github.CypDasHuhn:Rooster:2fd1a0fa65")
 
     bukkitLibrary("com.google.code.gson:gson:2.10.1")
     testImplementation("com.google.code.gson:gson:2.10.1")
@@ -52,6 +55,13 @@ dependencies {
     implementation(platform("com.intellectualsites.bom:bom-newest:1.52")) // Ref: https://github.com/IntellectualSites/bom
     compileOnly("com.fastasyncworldedit:FastAsyncWorldEdit-Core")
     compileOnly("com.fastasyncworldedit:FastAsyncWorldEdit-Bukkit") { isTransitive = false }
+
+    implementation("dev.jorel:commandapi-bukkit-shade-mojang-mapped:10.1.2")
+
+    implementation(project(":RoosterSql"))
+    implementation(project(":RoosterCommon"))
+    implementation(project(":RoosterLocalization"))
+    implementation(project(":RoosterUI"))
 }
 
 val targetJavaVersion = 21
@@ -61,12 +71,14 @@ kotlin {
 
 bukkit {
     name = "BuildPlugin"
-    main = "de.cypdashuhn.build.BuildPlugin"
-    apiVersion = "1.21.3"
+    main = "dev.cypdashuhn.build.BuildPlugin"
+    apiVersion = "1.21.5"
 
     commands {
-        register("!build")
-        register("!settings")
+        register("!create")
+        register("!load")
+        register("!edit")
+        register("!delete")
     }
 
     permissions {
@@ -77,17 +89,17 @@ bukkit {
 }
 tasks {
     runServer {
-        // Configure the Minecraft version for our task.
-        // This is the only required configuration besides applying the plugin.
-        // Your plugin's jar (or shadowJar if present) will be used automatically.
-        minecraftVersion("1.21.3")
-    }
-    shadowJar {
-        mergeServiceFiles()
+        minecraftVersion("1.21.5") // set explicitly if not auto-resolved
+        jvmArgs("-Dkotlinx.coroutines.debug=off")
     }
 }
 
-
+tasks.withType<ShadowJar> {
+    relocate("dev.jorel.commandapi", "dev.cypdashuhn.build.commandapi")
+    manifest {
+        attributes["paperweight-mappings-namespace"] = "mojang"
+    }
+}
 
 tasks.build {
     dependsOn("shadowJar")

@@ -11,3 +11,6 @@ project(":RoosterCommon").projectDir = file("../../repos/RoosterUI/RoosterCommon
 
 include(":RoosterLocalization")
 project(":RoosterLocalization").projectDir = file("../../repos/RoosterUI/RoosterLocalization")
+
+include(":RoosterSql")
+project(":RoosterSql").projectDir = file("../../IdeaProjects/RoosterSql")

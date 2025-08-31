@@ -1,4 +1,4 @@
-package de.cypdashuhn.build.actions
+package dev.cypdashuhn.build.actions
 
 import com.sk89q.worldedit.WorldEdit
 import com.sk89q.worldedit.bukkit.BukkitAdapter
@@ -12,16 +12,15 @@ import com.sk89q.worldedit.function.operation.Operation
 import com.sk89q.worldedit.function.operation.Operations
 import com.sk89q.worldedit.regions.Region
 import com.sk89q.worldedit.session.ClipboardHolder
-import de.cypdashuhn.rooster.core.Rooster
+import dev.cypdashuhn.build.BuildPlugin
 import org.bukkit.Location
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 
-
 object SchematicManager {
     private fun dir(buildName: String, frame: Int): File {
-        return File(Rooster.pluginFolder + "/schematics/$buildName/$frame.schem")
+        return File(BuildPlugin.plugin.dataFolder.toString() + "/schematics/$buildName/$frame.schem")
     }
 
     fun save(buildName: String, frame: Int, region: Region) {

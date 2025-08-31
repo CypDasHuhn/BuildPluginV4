@@ -9,6 +9,9 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
+            <option value="$USER_HOME$/repos/RoosterUI" />
+            <option value="$USER_HOME$/repos/RoosterUI/RoosterCommon" />
+            <option value="$USER_HOME$/repos/RoosterUI/RoosterLocalization" />
           </set>
         </option>
       </GradleProjectSettings>

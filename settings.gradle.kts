@@ -4,13 +4,13 @@ plugins {
 rootProject.name = "BuildPlugin"
 
 include(":RoosterUI")
-project(":RoosterUI").projectDir = file("../../repos/RoosterUI")
+project(":RoosterUI").projectDir = file("../RoosterUI")
 
 include(":RoosterCommon")
-project(":RoosterCommon").projectDir = file("../../repos/RoosterUI/RoosterCommon")
+project(":RoosterCommon").projectDir = file("../RoosterUI/RoosterCommon")
 
 include(":RoosterLocalization")
-project(":RoosterLocalization").projectDir = file("../../repos/RoosterUI/RoosterLocalization")
+project(":RoosterLocalization").projectDir = file("../RoosterUI/RoosterLocalization")
 
 include(":RoosterSql")
-project(":RoosterSql").projectDir = file("../../IdeaProjects/RoosterSql")
+project(":RoosterSql").projectDir = file("../RoosterSql")

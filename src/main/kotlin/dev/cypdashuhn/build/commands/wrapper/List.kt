@@ -10,10 +10,11 @@ fun <T> stringListArgument(
     list: List<String>,
     byName: (String) -> T?
 ): Argument<T> {
+    val typedList = list.toTypedArray()
     return CustomArgument<T, String>(TextArgument(key)) { info ->
         val res = byName(info.input) ?: throw error("Invalid name: ", true)
         res
-    }.replaceSuggestions(ArgumentSuggestions.strings(list))
+    }.replaceSuggestions(ArgumentSuggestions.strings { typedList })
 }
 
 fun genericListEntryArgument(

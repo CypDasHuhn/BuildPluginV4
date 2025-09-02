@@ -1,5 +1,9 @@
 package dev.cypdashuhn.build
 
+import dev.cypdashuhn.build.commands.build.create
+import dev.cypdashuhn.build.commands.build.delete
+import dev.cypdashuhn.build.commands.build.edit
+import dev.cypdashuhn.build.commands.build.load
 import dev.cypdashuhn.build.db.DbBuildsManager
 import dev.cypdashuhn.build.db.FrameManager
 import dev.cypdashuhn.rooster.common.RoosterServices
@@ -29,7 +33,6 @@ class BuildPlugin : JavaPlugin() {
     }
 
     override fun onEnable() {
-        CommandAPI.onEnable()
         plugin = this
 
         initRooster(plugin, services) {
@@ -44,6 +47,12 @@ class BuildPlugin : JavaPlugin() {
 
             db(listOf(DbBuildsManager.Builds, FrameManager.Frames))
         }
+
+        CommandAPI.onEnable()
+        create()
+        edit()
+        load()
+        delete()
     }
 
     override fun onDisable() {

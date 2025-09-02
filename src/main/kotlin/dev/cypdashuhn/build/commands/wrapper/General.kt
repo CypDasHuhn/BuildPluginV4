@@ -1,5 +1,6 @@
 package dev.cypdashuhn.build.commands.wrapper
 
+import dev.jorel.commandapi.CommandTree
 import dev.jorel.commandapi.arguments.Argument
 import dev.jorel.commandapi.arguments.ArgumentSuggestions
 import dev.jorel.commandapi.arguments.CustomArgument
@@ -26,4 +27,13 @@ fun existsByColumn(column: Column<String>): ((String) -> Boolean) = { column.val
 fun <T> Column<T>.valueByColumn(value: T): ResultRow? {
     val table = this.table
     return table.selectAll().where(this eq value).firstOrNull()
+}
+
+fun CommandTree.useMultiple(
+    vararg args: Argument<*>,
+    block: CommandTree.() -> Unit
+) {
+    args.forEach { arg ->
+        this.then(arg).block()
+    }
 }

@@ -80,6 +80,11 @@ object DbBuildsManager {
     }
 
     fun all(): List<Build> {
-        return Build.all().toList()
+        return transaction { Build.all().toList() }
+    }
+
+    fun frameCount(build: Build) = frameCount(build.id.value)
+    fun frameCount(buildId: Int): Int = transaction {
+        Builds.select(Builds.frameAmount, Builds.id eq buildId).first()[Builds.frameAmount]
     }
 }

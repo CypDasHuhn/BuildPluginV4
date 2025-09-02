@@ -75,10 +75,6 @@ bukkit {
     apiVersion = "1.21.5"
 
     commands {
-        register("!create")
-        register("!load")
-        register("!edit")
-        register("!delete")
     }
 
     permissions {

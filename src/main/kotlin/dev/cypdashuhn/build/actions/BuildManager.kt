@@ -6,15 +6,24 @@ import dev.cypdashuhn.build.db.FrameManager
 import dev.cypdashuhn.build.worldedit.toWorldEditRegion
 import dev.cypdashuhn.rooster.common.region.Region
 import dev.cypdashuhn.rooster.common.region.compareVectors
+import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.entity.Player
+import org.jetbrains.exposed.sql.transactions.transaction
 
 object BuildManager {
-    fun create(player: Player, buildName: String, region: Region) {
-        DbBuildsManager.register(buildName, region.dimensions)
-        FrameManager.newFrame(buildName, 1)
-        SchematicManager.save(buildName, 1, region.toWorldEditRegion())
+    fun create(player: Player, buildName: String, region: Region): Boolean {
+        try {
+            DbBuildsManager.register(buildName, region.dimensions)
+            FrameManager.newFrame(buildName, 1)
+            SchematicManager.save(buildName, 1, region.toWorldEditRegion())
+        } catch (e: Exception) {
+            player.sendMessage(Component.translatable("build.create.error"))
+            e.printStackTrace()
+            return false
+        }
+        return true
     }
 
     fun load(player: Player, build: DbBuildsManager.Build, frame: Int, region: Region) =
@@ -61,16 +70,16 @@ object BuildManager {
     fun save(player: Player, build: DbBuildsManager.Build, frame: Int, region: Region) =
         save(player, build, frame, region.edge1, region.edge2)
 
-    fun save(player: Player, build: DbBuildsManager.Build, frame: Int, pos1: Location, pos2: Location?) {
+    fun save(player: Player, build: DbBuildsManager.Build, frame: Int, pos1: Location, pos2: Location?): Boolean {
         val frames = build.frameAmount
-
+        transaction { build.refresh() }
         assert(frame in 1..frames + 1) { "Frame number must be between 1 and ${frames + 1}" }
 
         if (pos2 != null) {
             val region = Region(pos1, pos2)
 
             val canProceed = compareVectors(player, build.dimensions, region.dimensions)
-            if (!canProceed) return
+            if (!canProceed) return false
         }
         if (frame == frames + 1) {
             FrameManager.newFrame(build.name, frame)
@@ -81,6 +90,7 @@ object BuildManager {
             pos2 ?: pos1.add(build.xLength.toDouble(), build.yLength.toDouble(), build.zLength.toDouble())
 
         SchematicManager.save(build.name, frame, Region(corner, secondCorner).toWorldEditRegion())
+        return true
     }
 
     fun delete(build: DbBuildsManager.Build) {

@@ -6,7 +6,7 @@ import dev.jorel.commandapi.CommandAPICommand
 import dev.jorel.commandapi.executors.CommandExecutor
 import net.kyori.adventure.text.Component
 
-val delete = CommandAPICommand("!delete")
+fun delete() = CommandAPICommand("!delete")
     .withArguments(buildNameArgument())
     .executes(CommandExecutor { sender, args ->
         val build: DbBuildsManager.Build by args.argsMap

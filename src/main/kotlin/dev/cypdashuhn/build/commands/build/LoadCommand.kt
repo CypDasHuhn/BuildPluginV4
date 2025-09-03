@@ -19,7 +19,10 @@ fun load() = CommandAPICommand("!load")
         val selection: Region by args.argsMap
         val frame: Int? = args.argsMap["frame"] as Int?
 
-        if (frame != null) BuildManager.load(sender as Player, build, frame, selection)
-        else BuildManager.loadAll(sender as Player, build, selection)
+        if (frame != null) {
+            BuildManager.load(sender as Player, build, frame, selection)
+        } else {
+            BuildManager.loadAll(sender as Player, build, selection)
+        }
     })
     .register()

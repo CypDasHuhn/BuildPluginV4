@@ -4,13 +4,11 @@ import dev.cypdashuhn.build.actions.BuildManager
 import dev.cypdashuhn.build.db.DbBuildsManager
 import dev.jorel.commandapi.CommandAPICommand
 import dev.jorel.commandapi.executors.CommandExecutor
-import net.kyori.adventure.text.Component
 
 fun delete() = CommandAPICommand("!delete")
     .withArguments(buildNameArgument())
     .executes(CommandExecutor { sender, args ->
         val build: DbBuildsManager.Build by args.argsMap
-        BuildManager.delete(build)
-        sender.sendMessage(Component.translatable("build.delete.success"))
+        BuildManager.delete(sender as org.bukkit.entity.Player, build)
     })
     .register()

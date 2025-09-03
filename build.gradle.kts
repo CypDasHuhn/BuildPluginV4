@@ -37,10 +37,7 @@ dependencies {
     bukkitLibrary("io.github.classgraph:classgraph:4.8.170")
     testImplementation("io.github.classgraph:classgraph:4.8.170")
 
-    implementation("net.kyori:adventure-api:4.17.0")
-    implementation("com.github.seeseemelk:MockBukkit-v1.21:3.127.1")
-
-    implementation("net.kyori:adventure-api:4.17.0")
+    implementation("net.kyori:adventure-api:4.24.0")
     implementation("com.github.seeseemelk:MockBukkit-v1.21:3.127.1")
 
     // exposed

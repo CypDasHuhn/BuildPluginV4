@@ -41,22 +41,28 @@ object SchematicManager {
         }
     }
 
-    fun load(buildName: String, frame: Int, pos1: Location) {
-        var clipboard: Clipboard
-        val file = dir(buildName, frame)
+    fun load(buildName: String, frame: Int, pos1: Location): Boolean {
+        try {
+            var clipboard: Clipboard
+            val file = dir(buildName, frame)
 
-        val format = ClipboardFormats.findByFile(file) ?: throw IllegalStateException("Schematic should exist")
+            val format = ClipboardFormats.findByFile(file) ?: throw IllegalStateException("Schematic should exist")
 
-        format.getReader(FileInputStream(file)).use { reader ->
-            clipboard = reader.read()
+            format.getReader(FileInputStream(file)).use { reader ->
+                clipboard = reader.read()
 
-            WorldEdit.getInstance().newEditSession(BukkitAdapter.adapt(pos1.world)).use { editSession ->
-                val operation: Operation = ClipboardHolder(clipboard)
-                    .createPaste(editSession)
-                    .to(asBlockVector(pos1))
-                    .build()
-                Operations.complete(operation)
+                WorldEdit.getInstance().newEditSession(BukkitAdapter.adapt(pos1.world)).use { editSession ->
+                    val operation: Operation = ClipboardHolder(clipboard)
+                        .createPaste(editSession)
+                        .to(asBlockVector(pos1))
+                        .build()
+                    Operations.complete(operation)
+                }
             }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return false
         }
+        return true
     }
 }

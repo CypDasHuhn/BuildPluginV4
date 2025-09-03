@@ -29,11 +29,14 @@ fun <T> Column<T>.valueByColumn(value: T): ResultRow? {
     return table.selectAll().where(this eq value).firstOrNull()
 }
 
+
 fun CommandTree.useMultiple(
     vararg args: Argument<*>,
-    block: CommandTree.() -> Unit
+    block: CommandTree.() -> Unit,
+    last: CommandTree.() -> Unit
 ) {
     args.forEach { arg ->
         this.then(arg).block()
     }
+    last()
 }

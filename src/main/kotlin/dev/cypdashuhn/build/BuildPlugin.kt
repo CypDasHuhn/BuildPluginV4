@@ -5,6 +5,9 @@ import dev.cypdashuhn.build.commands.build.create
 import dev.cypdashuhn.build.commands.build.delete
 import dev.cypdashuhn.build.commands.build.edit
 import dev.cypdashuhn.build.commands.build.load
+import dev.cypdashuhn.build.commands.test
+import dev.cypdashuhn.build.commands.test2
+import dev.cypdashuhn.build.commands.test3
 import dev.cypdashuhn.build.db.DbBuildsManager
 import dev.cypdashuhn.build.db.FrameManager
 import dev.cypdashuhn.rooster.common.RoosterCache
@@ -19,11 +22,10 @@ import dev.cypdashuhn.rooster.localization.provider.YmlLocaleProvider
 import dev.jorel.commandapi.CommandAPI
 import dev.jorel.commandapi.CommandAPIBukkitConfig
 import net.kyori.adventure.key.Key
+import net.kyori.adventure.text.minimessage.translation.MiniMessageTranslationStore
 import net.kyori.adventure.translation.GlobalTranslator
-import net.kyori.adventure.translation.TranslationStore
 import net.kyori.adventure.util.UTF8ResourceBundleControl
 import org.bukkit.plugin.java.JavaPlugin
-import java.text.MessageFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -45,8 +47,8 @@ class BuildPlugin : JavaPlugin() {
     override fun onEnable() {
         plugin = this
 
-        val store: TranslationStore.StringBased<MessageFormat?> =
-            TranslationStore.messageFormat(Key.key("namespace:value"))
+        val store: MiniMessageTranslationStore =
+            MiniMessageTranslationStore.create(Key.key("namespace:value"))
 
         val bundle = ResourceBundle.getBundle("dev.cypdashuhn.build", Locale.US, UTF8ResourceBundleControl.get())
         store.registerAll(Locale.US, bundle, true)
@@ -70,6 +72,9 @@ class BuildPlugin : JavaPlugin() {
         edit()
         load()
         delete()
+        test()
+        test2()
+        test3()
     }
 
     override fun onDisable() {

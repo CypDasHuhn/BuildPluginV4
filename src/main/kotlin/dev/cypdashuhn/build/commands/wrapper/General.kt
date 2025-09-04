@@ -32,11 +32,12 @@ fun <T> Column<T>.valueByColumn(value: T): ResultRow? {
 
 fun CommandTree.useMultiple(
     vararg args: Argument<*>,
-    block: CommandTree.() -> Unit,
+    block: CommandTree.() -> CommandTree,
     last: CommandTree.() -> Unit
 ) {
+    var tree = this
     args.forEach { arg ->
-        this.then(arg).block()
+        tree = this.then(arg).block()
     }
-    last()
+    tree.last()
 }

@@ -1,29 +1,44 @@
 package dev.cypdashuhn.build.commands.wrapper
 
+import dev.jorel.commandapi.IStringTooltip
 import dev.jorel.commandapi.arguments.Argument
 import dev.jorel.commandapi.arguments.ArgumentSuggestions
 import dev.jorel.commandapi.arguments.CustomArgument
 import dev.jorel.commandapi.arguments.TextArgument
+import org.bukkit.command.CommandSender
 
-fun <T> stringListArgument(
+fun <T> listWithoutSuggestionsArgument(
     key: String,
-    list: List<String>,
-    byName: (String) -> T?
+    listProvider: (CommandSender) -> List<T>,
+    entityName: T.() -> String
 ): Argument<T> {
-    val typedList = list.toTypedArray()
     return CustomArgument<T, String>(TextArgument(key)) { info ->
-        val res = byName(info.input) ?: throw error("Invalid name: ", true)
+        val res = listProvider(info.sender).firstOrNull { it.entityName() == info.input }
+        if (res == null) throw error("Invalid name: ", true)
         res
-    }.replaceSuggestions(ArgumentSuggestions.strings { typedList })
+    }
 }
 
-fun genericListEntryArgument(
+fun <T> listArgument(
     key: String,
-    list: List<String>
-) = stringListArgument(key, list, byName = { input: String -> list.find { it == input } })
+    listProvider: (CommandSender) -> List<T>,
+    entityName: T.() -> String
+) = listWithoutSuggestionsArgument(key, listProvider, entityName).replaceSuggestions(
+    ArgumentSuggestions.strings { listProvider(it.sender).map { it.entityName() }.toTypedArray() }
+)
 
-fun <T> listEntryArgument(
+fun <T> listArgument(
     key: String,
-    list: List<T>,
-    selector: (T) -> String
-) = stringListArgument(key, list.map(selector), byName = { input: String -> list.find { selector(it) == input } })
+    listProvider: (CommandSender) -> List<T>,
+    entityName: T.() -> String,
+    suggestion: T.() -> IStringTooltip
+): Argument<T> = listWithoutSuggestionsArgument(key, listProvider, entityName).replaceSuggestions(
+    ArgumentSuggestions.stringsWithTooltips {
+        listProvider(it.sender).map { it.suggestion() }.toTypedArray()
+    }
+)
+
+fun stringListArgument(
+    key: String,
+    listProvider: (CommandSender) -> List<String>
+): Argument<String> = listArgument(key, listProvider) { this }

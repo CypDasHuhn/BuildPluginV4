@@ -49,6 +49,9 @@ object DbBuildsManager {
 
         val dimensions: Vector3d
             get() = Vector3d(xLength.toDouble(), yLength.toDouble(), zLength.toDouble())
+
+        val readableDimensions: String
+            get() = "$xLength x $yLength x $zLength"
     }
 
     enum class BuildType(val isMorph: Boolean?) {

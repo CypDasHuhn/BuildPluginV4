@@ -6,8 +6,8 @@ import dev.cypdashuhn.build.db.FrameManager
 import dev.cypdashuhn.build.worldedit.toWorldEditRegion
 import dev.cypdashuhn.rooster.common.region.Region
 import dev.cypdashuhn.rooster.common.region.compareVectors
+import dev.cypdashuhn.rooster.common.util.tSend
 import dev.cypdashuhn.rooster.common.util.wrap
-import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.entity.Player
@@ -23,23 +23,17 @@ object BuildManager {
         return BuildPlugin.cache.getIfPresent(buildPluginLastCacheKey + build.id, player) as Int?
     }
 
-    fun create(player: Player, buildName: String, region: Region): Boolean {
-        try {
+    fun create(player: Player, buildName: String, region: Region) =
+        wrap(player, "build.create.error", "build" to buildName) {
             DbBuildsManager.register(buildName, region.dimensions)
             FrameManager.newFrame(buildName, 1)
             SchematicManager.save(buildName, 1, region.toWorldEditRegion())
             updateLastFrame(player, DbBuildsManager.buildByName(buildName)!!, 1)
-            player.sendMessage(Component.translatable("build.create.success", Component.text(buildName)))
-        } catch (e: Exception) {
-            player.sendMessage(Component.translatable("build.create.error"))
-            e.printStackTrace()
-            return false
+            player.tSend("build.create.success", "build" to buildName)
         }
-        return true
-    }
 
     fun load(player: Player, build: DbBuildsManager.Build, frame: Int, region: Region) =
-        wrap(player, "build.load.single.error") {
+        wrap(player, "build.load.single.error", "build" to build.name, "frame" to frame.toString()) {
             load(player, build, frame, region.edge1, region.edge2)
         }
 
@@ -51,7 +45,7 @@ object BuildManager {
         loadAll(player, build, region.edge1, region.edge2)
 
     fun loadAll(player: Player, build: DbBuildsManager.Build, pos1: Location, pos2: Location?) =
-        wrap(player, "build.load.all.error") {
+        wrap(player, "build.load.all.error", "build" to build.name) {
             val frames = build.frameAmount
             val generalDuration = build.generalDuration
 
@@ -85,8 +79,8 @@ object BuildManager {
     fun save(player: Player, build: DbBuildsManager.Build, frame: Int, region: Region) =
         save(player, build, frame, region.edge1, region.edge2)
 
-    fun save(player: Player, build: DbBuildsManager.Build, frame: Int, pos1: Location, pos2: Location?) {
-        try {
+    fun save(player: Player, build: DbBuildsManager.Build, frame: Int, pos1: Location, pos2: Location?) =
+        wrap(player, "build.edit.success", "build" to build.name, "frame" to frame.toString()) {
             transaction { build.refresh() }
             val frames = build.frameAmount
             assert(frame in 1..frames + 1) { "Frame number must be between 1 and ${frames + 1}" }
@@ -95,7 +89,7 @@ object BuildManager {
                 val region = Region(pos1, pos2)
 
                 val canProceed = compareVectors(player, build.dimensions, region.dimensions)
-                if (!canProceed) return
+                if (!canProceed) return@wrap
             }
             if (frame == frames + 1) {
                 FrameManager.newFrame(build.name, frame)
@@ -107,29 +101,14 @@ object BuildManager {
 
             SchematicManager.save(build.name, frame, Region(corner, secondCorner).toWorldEditRegion())
             updateLastFrame(player, build, frame)
-            player.sendMessage(
-                Component.translatable(
-                    "build.edit.success",
-                    Component.text(build.name),
-                    Component.text(frame.toString())
-                )
-            )
-        } catch (e: Exception) {
-            player.sendMessage(
-                Component.translatable(
-                    "build.edit.error",
-                    Component.text(build.name),
-                    Component.text(frame.toString())
-                )
-            )
-            e.printStackTrace()
+            player.tSend("build.edit.success", "build" to build.name, "frame" to frame.toString())
         }
-    }
 
-    fun delete(player: Player, build: DbBuildsManager.Build) = wrap(player, "build.delete.error") {
-        DbBuildsManager.delete(build)
-        player.sendMessage(Component.translatable("build.delete.success", Component.text(build.name)))
-    }
+    fun delete(player: Player, build: DbBuildsManager.Build) =
+        wrap(player, "build.delete.error", "build" to build.name) {
+            DbBuildsManager.delete(build)
+            player.tSend("build.edit.success", "build" to build.name)
+        }
 
     private fun target(pos1: Location, pos2: Location?): Location {
         return if (pos2 == null) pos1 else {

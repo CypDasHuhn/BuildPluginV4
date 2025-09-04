@@ -2,14 +2,20 @@ package dev.cypdashuhn.build.commands.build
 
 import dev.cypdashuhn.build.actions.BuildManager
 import dev.cypdashuhn.build.commands.wrapper.error
-import dev.cypdashuhn.build.commands.wrapper.listEntryArgument
+import dev.cypdashuhn.build.commands.wrapper.listArgument
 import dev.cypdashuhn.build.commands.wrapper.simpleSuggestions
 import dev.cypdashuhn.build.db.DbBuildsManager
+import dev.jorel.commandapi.StringTooltip
 import dev.jorel.commandapi.arguments.*
 import dev.jorel.commandapi.executors.CommandArguments
 import org.bukkit.entity.Player
 
-fun buildNameArgument() = listEntryArgument("build", DbBuildsManager.all()) { it.name }
+fun buildNameArgument() = listArgument("build", { DbBuildsManager.all() }, { name }) {
+    StringTooltip.ofString(
+        name,
+        "$readableDimensions | frames: $frameAmount"
+    )
+}
 
 const val frameKey = "frame"
 fun frameArgument(extraFrames: Int) =

@@ -14,7 +14,7 @@ fun test3() = CommandTree("!test3")
 
 fun test2() {
     CommandTree("!test2").useMultiple(
-        IntegerArgument("number"),
+        IntegerArgument("number").replaceSuggestions(ArgumentSuggestions.strings("1", "2", "3")),
         TextArgument("text").simpleSuggestions("last", "new", "after-last"),
         block = {
             executes(CommandExecutor { sender, info ->
@@ -57,15 +57,15 @@ fun CommandTree.useMultiple(
     args.forEachIndexed { idx, arg ->
         val isLast = idx == lastIdx
 
+        if (arg.includedSuggestions.isPresent) suggestionList += arg.includedSuggestions.get()
+        if (arg.overriddenSuggestions.isPresent) suggestionList += arg.overriddenSuggestions.get()
         if (!isLast) {
-            if (arg.includedSuggestions.isPresent) suggestionList += arg.includedSuggestions.get()
             arg.replaceSuggestions(ArgumentSuggestions.empty())
-            tree = tree.then(arg.block())
         }
         if (isLast) {
-            if (arg.includedSuggestions.isPresent) suggestionList += arg.suggestions
             arg.replaceSuggestions(ArgumentSuggestions.merge(*suggestionList.toTypedArray()))
         }
+        tree = tree.then(arg.block())
     }
     tree.last()
 }

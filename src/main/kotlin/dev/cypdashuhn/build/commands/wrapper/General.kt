@@ -1,9 +1,12 @@
 package dev.cypdashuhn.build.commands.wrapper
 
-import dev.jorel.commandapi.CommandTree
+import dev.jorel.commandapi.AbstractArgumentTree
+import dev.jorel.commandapi.AbstractCommandTree
 import dev.jorel.commandapi.arguments.Argument
 import dev.jorel.commandapi.arguments.ArgumentSuggestions
 import dev.jorel.commandapi.arguments.CustomArgument
+import dev.jorel.commandapi.executors.CommandArguments
+import org.bukkit.command.CommandSender
 import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
@@ -29,15 +32,39 @@ fun <T> Column<T>.valueByColumn(value: T): ResultRow? {
     return table.selectAll().where(this eq value).firstOrNull()
 }
 
-
-fun CommandTree.useMultiple(
+fun <T> AbstractArgumentTree<T, Argument<*>, CommandSender>.useMultiple(
     vararg args: Argument<*>,
-    block: CommandTree.() -> CommandTree,
-    last: CommandTree.() -> Unit
-) {
+    suggestions: ArgumentSuggestions<CommandSender>,
+    block: Argument<*>.() -> AbstractArgumentTree<*, Argument<*>, CommandSender>,
+    last: AbstractArgumentTree<*, Argument<*>, CommandSender>.() -> Unit = { }
+): AbstractCommandTree<*, Argument<*>, CommandSender> {
     var tree = this
-    args.forEach { arg ->
-        tree = this.then(arg).block()
+
+    args.forEachIndexed { idx, arg ->
+        val isLast = idx == args.size - 1
+        if (isLast) tree = tree.then(arg.replaceSuggestions(suggestions).block())
+        tree = tree.then(arg.block())
     }
     tree.last()
+
+    return tree
+}
+
+inline fun <reified T> CommandArguments.eitherOf(vararg nodeNames: String): T {
+    argsMap.filter { it.key in nodeNames }.forEach {
+        if (it.value is T) return it.value as T
+    }
+    throw error("No value found")
+}
+
+inline fun <reified T> CommandArguments.safeEitherOf(vararg nodeNames: String): T? {
+    argsMap.filter { it.key in nodeNames }.forEach {
+        if (it.value is T) return it.value as T
+    }
+    return null
+}
+
+fun List<Int>.padded(): List<String> {
+    val max = this.maxOrNull() ?: 0
+    return map { it.toString().padStart(max.toString().length, '0') }
 }

@@ -1,11 +1,13 @@
 package dev.cypdashuhn.build.commands
 
-import dev.cypdashuhn.build.commands.wrapper.simpleSuggestions
-import dev.jorel.commandapi.AbstractArgumentTree
+import dev.cypdashuhn.build.commands.wrapper.padded
+import dev.cypdashuhn.build.commands.wrapper.useMultiple
 import dev.jorel.commandapi.CommandTree
-import dev.jorel.commandapi.arguments.*
+import dev.jorel.commandapi.arguments.ArgumentSuggestions
+import dev.jorel.commandapi.arguments.IntegerArgument
+import dev.jorel.commandapi.arguments.LiteralArgument
+import dev.jorel.commandapi.arguments.TextArgument
 import dev.jorel.commandapi.executors.CommandExecutor
-import org.bukkit.command.CommandSender
 
 fun test3() = CommandTree("!test3")
     .then(LiteralArgument("branch1").executes(CommandExecutor { sender, info -> sender.sendMessage("test1") }))
@@ -14,8 +16,15 @@ fun test3() = CommandTree("!test3")
 
 fun test2() {
     CommandTree("!test2").useMultiple(
-        IntegerArgument("number").replaceSuggestions(ArgumentSuggestions.strings("1", "2", "3")),
-        TextArgument("text").simpleSuggestions("last", "new", "after-last"),
+        IntegerArgument("number"),
+        TextArgument("text"),
+        suggestions = ArgumentSuggestions.strings {
+            arrayOf(
+                "-last",
+                "-new",
+                "-after-last"
+            ) + (0..10).toList().padded()
+        },
         block = {
             executes(CommandExecutor { sender, info ->
                 val number = info.argsMap["number"] as Int?
@@ -32,6 +41,7 @@ fun test2() {
 fun test() = CommandTree("!test").useMultiple(
     LiteralArgument("branch1"),
     LiteralArgument("branch2"),
+    suggestions = ArgumentSuggestions.strings { arrayOf("branch1", "branch2") },
     block = {
         executes(CommandExecutor { sender, info ->
             val branch = info.argsMap["branch1"] as String?
@@ -44,28 +54,3 @@ fun test() = CommandTree("!test").useMultiple(
     },
     last = { register() }
 )
-
-fun CommandTree.useMultiple(
-    vararg args: Argument<*>,
-    block: Argument<*>.() -> AbstractArgumentTree<*, Argument<*>, CommandSender>,
-    last: CommandTree.() -> Unit
-) {
-    var tree = this
-    val suggestionList = mutableListOf<ArgumentSuggestions<CommandSender>>()
-
-    val lastIdx = args.size - 1
-    args.forEachIndexed { idx, arg ->
-        val isLast = idx == lastIdx
-
-        if (arg.includedSuggestions.isPresent) suggestionList += arg.includedSuggestions.get()
-        if (arg.overriddenSuggestions.isPresent) suggestionList += arg.overriddenSuggestions.get()
-        if (!isLast) {
-            arg.replaceSuggestions(ArgumentSuggestions.empty())
-        }
-        if (isLast) {
-            arg.replaceSuggestions(ArgumentSuggestions.merge(*suggestionList.toTypedArray()))
-        }
-        tree = tree.then(arg.block())
-    }
-    tree.last()
-}

@@ -46,7 +46,7 @@ fun dynamicFrameArgument(): Argument<Int> {
             if (lastFrame == null) throw error("Last frame too long ago", false)
             if (info.input == "-last") lastFrame else lastFrame + 1
         } else throw error("Invalid frame: ", true)
-    }
+    }.replaceSuggestions(dynamicFrameArgumentSuggestions())
 }
 
 fun dynamicFrameArgumentSuggestions() =

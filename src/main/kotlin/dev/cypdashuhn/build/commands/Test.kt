@@ -1,13 +1,10 @@
 package dev.cypdashuhn.build.commands
 
-import dev.cypdashuhn.build.commands.wrapper.padded
-import dev.cypdashuhn.build.commands.wrapper.useMultiple
+import dev.cypdashuhn.build.commands.wrapper.*
 import dev.jorel.commandapi.CommandTree
-import dev.jorel.commandapi.arguments.ArgumentSuggestions
-import dev.jorel.commandapi.arguments.IntegerArgument
-import dev.jorel.commandapi.arguments.LiteralArgument
-import dev.jorel.commandapi.arguments.TextArgument
+import dev.jorel.commandapi.arguments.*
 import dev.jorel.commandapi.executors.CommandExecutor
+import org.bukkit.command.CommandSender
 
 fun test3() = CommandTree("!test3")
     .then(LiteralArgument("branch1").executes(CommandExecutor { sender, info -> sender.sendMessage("test1") }))
@@ -16,15 +13,8 @@ fun test3() = CommandTree("!test3")
 
 fun test2() {
     CommandTree("!test2").useMultiple(
-        IntegerArgument("number"),
-        TextArgument("text"),
-        suggestions = ArgumentSuggestions.strings {
-            arrayOf(
-                "-last",
-                "-new",
-                "-after-last"
-            ) + (0..10).toList().padded()
-        },
+        IntegerArgument("number").simpleSuggestions(*(0..10).toList().padded().toTypedArray()),
+        TextArgument("text").simpleSuggestions("last", "after-last", "new"),
         block = {
             executes(CommandExecutor { sender, info ->
                 val number = info.argsMap["number"] as Int?
@@ -39,18 +29,46 @@ fun test2() {
 }
 
 fun test() = CommandTree("!test").useMultiple(
-    LiteralArgument("branch1"),
-    LiteralArgument("branch2"),
-    suggestions = ArgumentSuggestions.strings { arrayOf("branch1", "branch2") },
+    TextArgument("branch1").transform(toEnum<TestEnum>()).replaceSuggestions(enumSuggestions<TestEnum>()),
+    TextArgument("branch2").transform(toEnum<OtherEnum>()).replaceSuggestions(enumSuggestions<OtherEnum>()),
     block = {
         executes(CommandExecutor { sender, info ->
-            val branch = info.argsMap["branch1"] as String?
-            val branch2 = info.argsMap["branch2"] as String?
-
-            if (branch != null) sender.sendMessage("Branch 1 selected")
-            if (branch2 != null) sender.sendMessage("Branch 2 selected")
-            sender.sendMessage("either or")
+            {
+                val s = info.eitherOf<Any>("branch1", "branch2")
+                sender.sendMessage(s.toString())
+            }
         })
-    },
-    last = { register() }
-)
+    }
+).register()
+
+enum class TestEnum {
+    TEST1,
+    TEST2,
+    TEST3
+}
+
+enum class OtherEnum {
+    OTHER1,
+    OTHER2,
+    OTHER3
+}
+
+fun <T, B> Argument<T>.transform(parser: CustomArgument.CustomArgumentInfoParser<B, T>): CustomArgument<B, T> {
+    return CustomArgument<B, T>(this, parser)
+}
+
+inline fun <reified T : Enum<T>> toEnum(ignoreCase: Boolean = true): CustomArgument.CustomArgumentInfoParser<T, String> {
+    val enumValues = enumValues<T>()
+    enumValues.associateBy { it.name.lowercase() }
+
+    return CustomArgument.CustomArgumentInfoParser { input ->
+        val entry = enumValues.firstOrNull { it.name.equals(input.input, ignoreCase = ignoreCase) }
+        if (entry == null) throw error("Entry not matching")
+        entry
+    }
+}
+
+inline fun <reified T : Enum<T>> enumSuggestions(): ArgumentSuggestions<CommandSender> {
+    val enumValues = enumValues<T>()
+    return ArgumentSuggestions.strings { enumValues.map { it.name }.toTypedArray() }
+}

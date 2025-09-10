@@ -5,6 +5,7 @@ import dev.jorel.commandapi.AbstractCommandTree
 import dev.jorel.commandapi.arguments.Argument
 import dev.jorel.commandapi.arguments.ArgumentSuggestions
 import dev.jorel.commandapi.arguments.CustomArgument
+import dev.jorel.commandapi.arguments.TextArgument
 import dev.jorel.commandapi.executors.CommandArguments
 import org.bukkit.command.CommandSender
 import org.jetbrains.exposed.sql.Column
@@ -60,6 +61,12 @@ fun AbstractCommandTree<*, Argument<*>, CommandSender>.useMultiple(
     tree.last()
 
     return tree
+}
+
+fun t() {
+    CustomArgument<String, String>(TextArgument("test")) {
+        ""
+    }
 }
 
 fun AbstractArgumentTree<*, Argument<*>, CommandSender>.useMultiple(
@@ -119,4 +126,8 @@ inline fun <reified T> CommandArguments.safeEitherOf(vararg nodeNames: String): 
 fun List<Int>.padded(): List<String> {
     val max = this.maxOrNull() ?: 0
     return map { it.toString().padStart(max.toString().length, '0') }
+}
+
+fun <T, B> Argument<T>.transform(parser: CustomArgument.CustomArgumentInfoParser<B, T>): CustomArgument<B, T> {
+    return CustomArgument<B, T>(this, parser)
 }

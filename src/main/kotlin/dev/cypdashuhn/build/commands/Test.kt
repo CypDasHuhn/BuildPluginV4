@@ -1,10 +1,13 @@
 package dev.cypdashuhn.build.commands
 
 import dev.cypdashuhn.build.commands.wrapper.*
+import dev.cypdashuhn.build.commands.wrapper.collection.enumSuggestions
+import dev.cypdashuhn.build.commands.wrapper.collection.toEnum
 import dev.jorel.commandapi.CommandTree
-import dev.jorel.commandapi.arguments.*
+import dev.jorel.commandapi.arguments.IntegerArgument
+import dev.jorel.commandapi.arguments.LiteralArgument
+import dev.jorel.commandapi.arguments.TextArgument
 import dev.jorel.commandapi.executors.CommandExecutor
-import org.bukkit.command.CommandSender
 
 fun test3() = CommandTree("!test3")
     .then(LiteralArgument("branch1").executes(CommandExecutor { sender, info -> sender.sendMessage("test1") }))
@@ -53,22 +56,4 @@ enum class OtherEnum {
     OTHER3
 }
 
-fun <T, B> Argument<T>.transform(parser: CustomArgument.CustomArgumentInfoParser<B, T>): CustomArgument<B, T> {
-    return CustomArgument<B, T>(this, parser)
-}
 
-inline fun <reified T : Enum<T>> toEnum(ignoreCase: Boolean = true): CustomArgument.CustomArgumentInfoParser<T, String> {
-    val enumValues = enumValues<T>()
-    enumValues.associateBy { it.name.lowercase() }
-
-    return CustomArgument.CustomArgumentInfoParser { input ->
-        val entry = enumValues.firstOrNull { it.name.equals(input.input, ignoreCase = ignoreCase) }
-        if (entry == null) throw error("Entry not matching")
-        entry
-    }
-}
-
-inline fun <reified T : Enum<T>> enumSuggestions(): ArgumentSuggestions<CommandSender> {
-    val enumValues = enumValues<T>()
-    return ArgumentSuggestions.strings { enumValues.map { it.name }.toTypedArray() }
-}

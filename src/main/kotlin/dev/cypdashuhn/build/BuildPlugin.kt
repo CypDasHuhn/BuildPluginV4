@@ -5,9 +5,8 @@ import dev.cypdashuhn.build.commands.build.create
 import dev.cypdashuhn.build.commands.build.delete
 import dev.cypdashuhn.build.commands.build.edit
 import dev.cypdashuhn.build.commands.build.load
-import dev.cypdashuhn.build.commands.test
-import dev.cypdashuhn.build.commands.test2
 import dev.cypdashuhn.build.commands.test3
+import dev.cypdashuhn.build.commands.test4
 import dev.cypdashuhn.build.db.DbBuildsManager
 import dev.cypdashuhn.build.db.FrameManager
 import dev.cypdashuhn.rooster.common.RoosterCache
@@ -72,9 +71,10 @@ class BuildPlugin : JavaPlugin() {
         edit()
         load()
         delete()
-        test()
-        test2()
+        //test()
+        //test2()
         test3()
+        test4()
     }
 
     override fun onDisable() {

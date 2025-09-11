@@ -1,48 +1,40 @@
 package dev.cypdashuhn.build.commands
 
-import dev.cypdashuhn.build.commands.wrapper.*
-import dev.cypdashuhn.build.commands.wrapper.collection.enumSuggestions
-import dev.cypdashuhn.build.commands.wrapper.collection.toEnum
+import dev.cypdashuhn.build.commands.wrapper.simpleSuggestions
+import dev.cypdashuhn.build.commands.wrapper.thenMerged
 import dev.jorel.commandapi.CommandTree
 import dev.jorel.commandapi.arguments.IntegerArgument
 import dev.jorel.commandapi.arguments.LiteralArgument
 import dev.jorel.commandapi.arguments.TextArgument
 import dev.jorel.commandapi.executors.CommandExecutor
 
+fun test4() = CommandTree("!test4").thenNested(
+    TextArgument("pre-arg"),
+    TextArgument("pre-arg-2").thenMerged(
+        IntegerArgument("branch1").simpleSuggestions("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"),
+        TextArgument("branch2").simpleSuggestions("-last", "-after-last", "-new"),
+        block = {
+            executes(CommandExecutor { sender, info ->
+                val preArg = info.argsMap["pre-arg"] as String?
+                sender.sendMessage("Pre-arg: $preArg")
+
+                val preArg2 = info.argsMap["pre-arg-2"] as String?
+                sender.sendMessage("Pre-arg-2: $preArg2")
+
+                val branch1 = info.argsMap["branch1"] as Int?
+                val branch2 = info.argsMap["branch2"] as String?
+
+                if (branch1 != null) sender.sendMessage("Branch 1: $branch1")
+                if (branch2 != null) sender.sendMessage("Branch 2: $branch2")
+            })
+        }
+    )
+).register()
+
 fun test3() = CommandTree("!test3")
     .then(LiteralArgument("branch1").executes(CommandExecutor { sender, info -> sender.sendMessage("test1") }))
     .then(LiteralArgument("branch2").executes(CommandExecutor { sender, info -> sender.sendMessage("test2") }))
     .register()
-
-fun test2() {
-    CommandTree("!test2").useMultiple(
-        IntegerArgument("number").simpleSuggestions(*(0..10).toList().padded().toTypedArray()),
-        TextArgument("text").simpleSuggestions("last", "after-last", "new"),
-        block = {
-            executes(CommandExecutor { sender, info ->
-                val number = info.argsMap["number"] as Int?
-                val alt = info.argsMap["text"] as String?
-
-                if (number != null) sender.sendMessage("Number: $number")
-                if (alt != null) sender.sendMessage("Alt: $alt")
-            })
-        },
-        last = { register() }
-    )
-}
-
-fun test() = CommandTree("!test").useMultiple(
-    TextArgument("branch1").transform(toEnum<TestEnum>()).replaceSuggestions(enumSuggestions<TestEnum>()),
-    TextArgument("branch2").transform(toEnum<OtherEnum>()).replaceSuggestions(enumSuggestions<OtherEnum>()),
-    block = {
-        executes(CommandExecutor { sender, info ->
-            {
-                val s = info.eitherOf<Any>("branch1", "branch2")
-                sender.sendMessage(s.toString())
-            }
-        })
-    }
-).register()
 
 enum class TestEnum {
     TEST1,

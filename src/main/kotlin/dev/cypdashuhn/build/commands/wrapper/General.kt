@@ -1,19 +1,14 @@
 package dev.cypdashuhn.build.commands.wrapper
 
-import dev.jorel.commandapi.AbstractArgumentTree
-import dev.jorel.commandapi.AbstractCommandTree
 import dev.jorel.commandapi.arguments.Argument
 import dev.jorel.commandapi.arguments.ArgumentSuggestions
 import dev.jorel.commandapi.arguments.CustomArgument
-import dev.jorel.commandapi.arguments.TextArgument
 import dev.jorel.commandapi.executors.CommandArguments
-import org.bukkit.command.CommandSender
 import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.selectAll
 import java.lang.reflect.Field
-import java.util.*
 
 fun error(value: String, appendInput: Boolean = false): CustomArgument.CustomArgumentException {
     return CustomArgument.CustomArgumentException.fromMessageBuilder(
@@ -33,67 +28,6 @@ fun existsByColumn(column: Column<String>): ((String) -> Boolean) = { column.val
 fun <T> Column<T>.valueByColumn(value: T): ResultRow? {
     val table = this.table
     return table.selectAll().where(this eq value).firstOrNull()
-}
-
-
-fun AbstractCommandTree<*, Argument<*>, CommandSender>.useMultiple(
-    vararg args: Argument<*>,
-    block: Argument<*>.() -> AbstractArgumentTree<*, Argument<*>, CommandSender>,
-    last: AbstractCommandTree<*, Argument<*>, CommandSender>.() -> Unit = { }
-): AbstractCommandTree<*, Argument<*>, CommandSender> {
-    var tree = this
-
-    val suggestionList: MutableList<ArgumentSuggestions<CommandSender>> = mutableListOf()
-
-    args.forEachIndexed { idx, arg ->
-        val isLast = idx == args.size - 1
-        if (arg.overriddenSuggestions.isPresent) suggestionList += arg.overriddenSuggestions.get()
-        if (!isLast) {
-            findFieldRecursive(arg::class.java, "suggestions").apply {
-                isAccessible = true
-                set(arg, Optional.empty<ArgumentSuggestions<CommandSender>>())
-            }
-        }
-        if (isLast) tree =
-            tree.then(arg.replaceSuggestions(ArgumentSuggestions.merge(*suggestionList.toTypedArray())).block())
-        tree = tree.then(arg.block())
-    }
-    tree.last()
-
-    return tree
-}
-
-fun t() {
-    CustomArgument<String, String>(TextArgument("test")) {
-        ""
-    }
-}
-
-fun AbstractArgumentTree<*, Argument<*>, CommandSender>.useMultiple(
-    vararg args: Argument<*>,
-    block: Argument<*>.() -> AbstractArgumentTree<*, Argument<*>, CommandSender>,
-    last: AbstractArgumentTree<*, Argument<*>, CommandSender>.() -> Unit = { }
-): AbstractArgumentTree<*, Argument<*>, CommandSender> {
-    var tree = this
-
-    val suggestionList: MutableList<ArgumentSuggestions<CommandSender>> = mutableListOf()
-
-    args.forEachIndexed { idx, arg ->
-        val isLast = idx == args.size - 1
-        if (arg.overriddenSuggestions.isPresent) suggestionList += arg.overriddenSuggestions.get()
-        if (!isLast) {
-            findFieldRecursive(arg::class.java, "suggestions").apply {
-                isAccessible = true
-                set(arg, Optional.empty<ArgumentSuggestions<CommandSender>>())
-            }
-        }
-        if (isLast) tree =
-            tree.then(arg.replaceSuggestions(ArgumentSuggestions.merge(*suggestionList.toTypedArray())).block())
-        tree = tree.then(arg.block())
-    }
-    tree.last()
-
-    return tree
 }
 
 fun findFieldRecursive(clazz: Class<*>, name: String): Field {

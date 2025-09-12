@@ -3,114 +3,155 @@ package dev.cypdashuhn.build.commands.wrapper
 import dev.jorel.commandapi.AbstractArgumentTree
 import dev.jorel.commandapi.AbstractCommandTree
 import dev.jorel.commandapi.CommandTree
-import dev.jorel.commandapi.arguments.*
+import dev.jorel.commandapi.arguments.Argument
+import dev.jorel.commandapi.arguments.ArgumentSuggestions
+import dev.jorel.commandapi.arguments.IntegerArgument
+import dev.jorel.commandapi.arguments.TextArgument
 import dev.jorel.commandapi.executors.CommandExecutor
 import org.bukkit.command.CommandSender
 import java.util.*
 
-fun AbstractArgumentTree<*, Argument<*>, CommandSender>.thenMerged(
-    vararg args: Argument<*>,
-    block: Argument<*>.() -> AbstractArgumentTree<*, Argument<*>, CommandSender>,
-): AbstractArgumentTree<*, Argument<*>, CommandSender> {
-    var tree = this
-
-    val suggestionList: MutableList<ArgumentSuggestions<CommandSender>> = mutableListOf()
-
-    args.forEachIndexed { idx, arg ->
-        val isLast = idx == args.size - 1
-        if (arg.overriddenSuggestions.isPresent) suggestionList += arg.overriddenSuggestions.get()
-        if (!isLast) {
-            findFieldRecursive(arg::class.java, "suggestions").apply {
-                isAccessible = true
-                set(arg, Optional.empty<ArgumentSuggestions<CommandSender>>())
-            }
-        }
-        if (isLast) tree =
-            tree.then(arg.replaceSuggestions(ArgumentSuggestions.merge(*suggestionList.toTypedArray())).block())
-        tree = tree.then(arg.block())
-    }
-
-    return tree
-}
-
-fun AbstractArgumentTree<*, Argument<*>, CommandSender>.thenMerged(
-    argList: List<Argument<*>>,
-    block: Argument<*>.() -> AbstractArgumentTree<*, Argument<*>, CommandSender>,
-) = this.thenMerged(args = argList.toTypedArray(), block)
-
-fun AbstractArgumentTree<*, Argument<*>, CommandSender>.thenNested(vararg args: MergedArgument): AbstractArgumentTree<*, Argument<*>, CommandSender> {
-    var tree = this
-
-    var argIndex = 0
-    while (true) {
-        if (argIndex >= args.size) break
-        val arg = args[argIndex]
-
-        if (arg.isSingle) tree = tree.then(arg.arguments.first())
-        else return tree.thenMerged(arg.arguments) {
-            thenNested(*args.drop(argIndex + 1).toTypedArray())
-        }
-        argIndex++
-    }
-
-    return tree
-}
+fun ACT.thenMerged(vararg arg: Argument<*>) = MergedTree(this).then(*arg)
+fun ACT.thenNestedMerged(vararg arg: ArgumentPart) = MergedTree(this).thenNestedMerged(*arg)
 
 fun test() {
-    CommandTree("!test").then(
-        LiteralArgument("test").thenNested(
-            TextArgument("test1").single(),
-            MergedArgument.of(IntegerArgument("number"), TextArgument("text")),
-            TextArgument("test2").single(),
-        )
-    )
+    CommandTree("!test").thenNestedMerged(
+        TextArgument("test1").single(),
+        MultiArgumentPart.of(IntegerArgument("number"), TextArgument("text")),
+        TextArgument("test2").single(),
+    ).executes(CommandExecutor { sender, info -> sender.sendMessage("test") }).register()
 }
 
 interface ArgumentPart {
-    fun getArguments(): List<AbstractArgumentTree<*, Argument<*>, CommandSender>>
+    fun getArguments(): List<AAT>
     val isSingle get() = getArguments().size == 1
 }
-class SingleArgumentPart<Impl : AbstractArgumentTree<Impl, Argument<*>, CommandSender>>(val instance: Impl) : AbstractArgumentTree<Impl, Argument<*>, CommandSender>(), ArgumentPart {
+
+class SingleArgumentPart<Impl : AbstractArgumentTree<Impl, Argument<*>, CommandSender>>(val instance: Impl) :
+    AbstractArgumentTree<Impl, Argument<*>, CommandSender>(), ArgumentPart {
     override fun getArguments() = listOf(this)
 
     override fun instance(): Impl? {
         return instance
     }
 }
+
 fun Argument<*>.single() = SingleArgumentPart(this)
-class MultiArgumentPart(val arguments: List<AbstractArgumentTree<*, Argument<*>, CommandSender>>) : ArgumentPart {
+class MultiArgumentPart(val arguments: List<AAT>) : ArgumentPart {
     override fun getArguments() = arguments
 
     companion object {
-        fun of(vararg args: AbstractArgumentTree<*, Argument<*>, CommandSender>) = MultiArgumentPart(args.toList())
+        fun of(vararg args: Argument<*>) = MultiArgumentPart(args.toList())
     }
 }
 
+typealias StackPart = AAT.(AAT.() -> AAT) -> AAT
+
 class MergedTree {
-    constructor(tree: AbstractCommandTree<*, Argument<*>, CommandSender>) {
+    companion object {
+        fun thenMerged(
+            tree: AAT,
+            vararg args: AAT,
+            block: AAT.() -> AAT,
+        ): AAT {
+            var tree = tree
+            val suggestionList: MutableList<ArgumentSuggestions<CommandSender>> = mutableListOf()
+
+            args.forEachIndexed { idx, arg ->
+                val isLast = idx == args.size - 1
+                val argInstance = arg.argument()
+                if (argInstance.overriddenSuggestions.isPresent) suggestionList += argInstance.overriddenSuggestions.get()
+                if (!isLast) {
+                    findFieldRecursive(arg::class.java, "suggestions").apply {
+                        isAccessible = true
+                        set(arg, Optional.empty<ArgumentSuggestions<CommandSender>>())
+                    }
+                }
+                if (isLast) tree =
+                    tree.then(
+                        argInstance.replaceSuggestions(ArgumentSuggestions.merge(*suggestionList.toTypedArray()))
+                            .block()
+                    )
+                tree = tree.then(arg.block())
+            }
+
+            return tree
+        }
+
+        fun thenNestedMerged(tree: AAT, vararg args: ArgumentPart): AAT {
+            var tree = tree
+            var argIndex = 0
+            while (true) {
+                if (argIndex >= args.size) break
+                val arg = args[argIndex]
+
+                if (arg.isSingle) tree = tree.then(arg.getArguments().first())
+                else return thenMerged(tree, *arg.getArguments().toTypedArray()) {
+                    thenNestedMerged(tree, *args.drop(argIndex + 1).toTypedArray())
+                }
+                argIndex++
+            }
+
+            return tree
+        }
+    }
+
+    constructor(tree: ACT) {
         this.tree = tree
         this.stack = mutableListOf()
     }
 
-    private constructor(tree: AbstractCommandTree<*, Argument<*>, CommandSender>, stack: List<AbstractCommandTree<*, Argument<*>, CommandSender>.() -> AbstractCommandTree<*, Argument<*>, CommandSender>>) {
+    private constructor(
+        tree: ACT,
+        stack: List<Pair<StackPart, Boolean>>
+    ) {
         this.stack = stack.toMutableList()
         this.tree = tree
     }
 
-    val tree: AbstractCommandTree<*, Argument<*>, CommandSender>
-    val stack: MutableList<AbstractCommandTree<*, Argument<*>, CommandSender>.() -> AbstractCommandTree<*, Argument<*>, CommandSender>>
-
-    private fun copy(stackAddition: AbstractCommandTree<*, Argument<*>, CommandSender>.() -> AbstractCommandTree<*, Argument<*>, CommandSender>): MergedTree {
-        return MergedTree(tree, stack + stackAddition)
+    val tree: ACT
+    val stack: MutableList<Pair<StackPart, Boolean>>
+    private fun copy(isNested: Boolean = false, stackAddition: StackPart): MergedTree {
+        return MergedTree(tree, stack + (stackAddition to isNested))
     }
-    fun then(tree: AbstractArgumentTree<*, Argument<*>, CommandSender>) = copy { then(tree) }
-    fun thenNested(vararg args: ArgumentPart): MergedTree = copy { thenNested(*args) }
-    fun thenNested(vararg args: AbstractArgumentTree<*, Argument<*>, CommandSender>): MergedTree = copy { thenNested(*args) }
 
-    fun executes(executor: CommandExecutor): MergedTree = copy { this.e }
+    fun then(vararg args: AAT): MergedTree {
+        if (args.isEmpty()) throw IllegalArgumentException("At least one argument must be provided")
+        return if (args.size == 1) copy { then(args.first()) }
+        // TODO: LOOK INTO AAT/ACT
+        else copy { thenMerged(tree as AAT, *args, block = it) }
+    }
+
+    fun thenNestedMerged(vararg args: ArgumentPart): MergedTree = copy { thenNestedMerged(this, *args) }
+    fun thenNested(vararg args: AAT): MergedTree =
+        copy { thenNested(*args) }
+
+    fun executes(executor: CommandExecutor): MergedTree = copy {
+        argument().executes(executor)
+    }
+
+    //TODO: LOOK INTO AAT/ACT
+    fun merge() = (tree as AAT).merge(stack) as ACT
     fun register() = merge().register()
-    fun merge(): AbstractCommandTree<*, Argument<*>, CommandSender> {
-        // apply stuff later
-        return tree
+}
+
+fun AAT.merge(stack: List<Pair<StackPart, Boolean>>): AAT {
+    var tree = this as AAT
+    for ((idx, pair) in stack.withIndex()) {
+        val (stackPart, isNested) = pair
+        val list = stack.drop(idx)
+        tree = tree.stackPart { merge(list) }
+        if (isNested) break
+    }
+    return tree
+}
+
+internal fun AAT.argument(): Argument<*> {
+    findFieldRecursive(this::class.java, "argument").apply {
+        isAccessible = true
+        return get(this) as Argument<*>
     }
 }
+
+typealias ACT = AbstractCommandTree<*, Argument<*>, CommandSender>
+typealias AAT = AbstractArgumentTree<*, Argument<*>, CommandSender>

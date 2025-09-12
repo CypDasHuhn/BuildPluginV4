@@ -1,8 +1,10 @@
 package dev.cypdashuhn.build.commands.wrapper
 
 import dev.jorel.commandapi.AbstractArgumentTree
+import dev.jorel.commandapi.AbstractCommandTree
 import dev.jorel.commandapi.CommandTree
 import dev.jorel.commandapi.arguments.*
+import dev.jorel.commandapi.executors.CommandExecutor
 import org.bukkit.command.CommandSender
 import java.util.*
 
@@ -64,12 +66,51 @@ fun test() {
     )
 }
 
-class MergedArgument(val arguments: List<Argument<*>>) {
-    val isSingle get() = arguments.size == 1
+interface ArgumentPart {
+    fun getArguments(): List<AbstractArgumentTree<*, Argument<*>, CommandSender>>
+    val isSingle get() = getArguments().size == 1
+}
+class SingleArgumentPart<Impl : AbstractArgumentTree<Impl, Argument<*>, CommandSender>>(val instance: Impl) : AbstractArgumentTree<Impl, Argument<*>, CommandSender>(), ArgumentPart {
+    override fun getArguments() = listOf(this)
+
+    override fun instance(): Impl? {
+        return instance
+    }
+}
+fun Argument<*>.single() = SingleArgumentPart(this)
+class MultiArgumentPart(val arguments: List<AbstractArgumentTree<*, Argument<*>, CommandSender>>) : ArgumentPart {
+    override fun getArguments() = arguments
 
     companion object {
-        fun of(vararg args: Argument<*>) = MergedArgument(args.toList())
+        fun of(vararg args: AbstractArgumentTree<*, Argument<*>, CommandSender>) = MultiArgumentPart(args.toList())
     }
 }
 
-fun Argument<*>.single() = MergedArgument(listOf(this))
+class MergedTree {
+    constructor(tree: AbstractCommandTree<*, Argument<*>, CommandSender>) {
+        this.tree = tree
+        this.stack = mutableListOf()
+    }
+
+    private constructor(tree: AbstractCommandTree<*, Argument<*>, CommandSender>, stack: List<AbstractCommandTree<*, Argument<*>, CommandSender>.() -> AbstractCommandTree<*, Argument<*>, CommandSender>>) {
+        this.stack = stack.toMutableList()
+        this.tree = tree
+    }
+
+    val tree: AbstractCommandTree<*, Argument<*>, CommandSender>
+    val stack: MutableList<AbstractCommandTree<*, Argument<*>, CommandSender>.() -> AbstractCommandTree<*, Argument<*>, CommandSender>>
+
+    private fun copy(stackAddition: AbstractCommandTree<*, Argument<*>, CommandSender>.() -> AbstractCommandTree<*, Argument<*>, CommandSender>): MergedTree {
+        return MergedTree(tree, stack + stackAddition)
+    }
+    fun then(tree: AbstractArgumentTree<*, Argument<*>, CommandSender>) = copy { then(tree) }
+    fun thenNested(vararg args: ArgumentPart): MergedTree = copy { thenNested(*args) }
+    fun thenNested(vararg args: AbstractArgumentTree<*, Argument<*>, CommandSender>): MergedTree = copy { thenNested(*args) }
+
+    fun executes(executor: CommandExecutor): MergedTree = copy { this.e }
+    fun register() = merge().register()
+    fun merge(): AbstractCommandTree<*, Argument<*>, CommandSender> {
+        // apply stuff later
+        return tree
+    }
+}

@@ -3,10 +3,7 @@ package dev.cypdashuhn.build.commands.wrapper
 import dev.jorel.commandapi.AbstractArgumentTree
 import dev.jorel.commandapi.AbstractCommandTree
 import dev.jorel.commandapi.CommandTree
-import dev.jorel.commandapi.arguments.Argument
-import dev.jorel.commandapi.arguments.ArgumentSuggestions
-import dev.jorel.commandapi.arguments.IntegerArgument
-import dev.jorel.commandapi.arguments.TextArgument
+import dev.jorel.commandapi.arguments.*
 import dev.jorel.commandapi.executors.CommandExecutor
 import org.bukkit.command.CommandSender
 import java.util.*
@@ -20,6 +17,18 @@ fun test() {
         MultiArgumentPart.of(IntegerArgument("number"), TextArgument("text")),
         TextArgument("test2").single(),
     ).executes(CommandExecutor { sender, info -> sender.sendMessage("test") }).register()
+
+    CommandTree("test")
+        .thenMerged(TextArgument("a"), IntegerArgument("b"))
+        .then(TextArgument("c"))
+        .then(TextArgument("d"), TextArgument("e"))
+        .executes { sender, info -> sender.sendMessage("test") }
+        .merge()
+        .then(TextArgument("f"))
+        .register()
+
+    CommandTree("!test2").then(LiteralArgument("test1"))
+        .executes(CommandExecutor { sender, info -> sender.sendMessage("test") }).register()
 }
 
 interface ArgumentPart {

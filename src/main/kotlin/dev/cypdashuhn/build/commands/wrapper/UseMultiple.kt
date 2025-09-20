@@ -27,12 +27,14 @@ fun test() {
         .then(TextArgument("f"))
         .register()
 
+    var s = IntegerArgument("s").then(TextArgument("t"))
+
     CommandTree("!test2").then(LiteralArgument("test1"))
         .executes(CommandExecutor { sender, info -> sender.sendMessage("test") }).register()
 }
 
 interface ArgumentPart {
-    fun getArguments(): List<AAT>
+    fun getArguments(): List<A>
     val isSingle get() = getArguments().size == 1
 }
 
